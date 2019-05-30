@@ -1,2 +1,2 @@
 
-[winkelmantanner.github.io/algebratool](winkelmantanner.github.io/algebratool)
+[winkelmantanner.github.io/algebratool](https://winkelmantanner.github.io/algebratool)
