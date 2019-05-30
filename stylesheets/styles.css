@@ -1,0 +1,6 @@
+.transformation_box {
+  width: inherited;
+  padding: 5px;
+  margin: 5px;
+  border: 5px outset blue;
+}

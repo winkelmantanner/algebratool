@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="description" content="Tool for doing algebra without making mistakes.">
+    <meta name="keywords" content="algebra,tool,math,utility,homework,solve,solver,manual">
+    <meta name="author" content="Tanner Winkelman">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+    <!-- <script src="https://requirejs.org/docs/release/2.3.6/minified/require.js"></script> -->
+    <script src="scripts/constants.js"></script>
+    <script src="scripts/nearley/lib/nearley.js"></script>
+    <script src="scripts/grammar.js"></script>
+    <script src="scripts/utilities.js"></script>
+    <script src='scripts/transformations.js'></script>
+    <script src='scripts/powertools.js'></script>
+    <script src='scripts/PriorityQueue.js'></script>
+
+    <title>Algebra Tool</title>
+
+    <!-- bootstrap css -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+
+    <script type='text/javascript'>
+
+      const GOLDEN_RULE_ACTION_DIV_CONTAINER_ID = 'golden_rule_action_div_container';
+      const SHORTEN_ACTION_DIV_CONTAINER_ID = 'shorten_action_div_container';
+
+
+      let history = []; // an array of transformations with an extra attribute: the string before the transformation
+
+      function parse(input) {
+        let parser = new nearley.Parser(nearley.Grammar.fromCompiled(grammar));
+        try {
+          parser.feed(input);
+          // document.getElementById("results").innerHTML = JSON.stringify(parser.results);
+          document.getElementById("transformation_container").innerHTML = "";
+          let dom_components = [];
+          let map_from_type_to_transformation_array = {};
+          for(let t of get_array_of_transformation(input, parser.results)) {
+            if(!(t.type in map_from_type_to_transformation_array)) {
+              map_from_type_to_transformation_array[t.type] = [];
+            }
+            map_from_type_to_transformation_array[t.type].push(t);
+          }
+          for(let type in map_from_type_to_transformation_array) {
+            let div = $('<div float="left" class="transformation_box card"></div>');
+            div.append($(get_transformation_header_html(type)));
+            for(let [transformation_index, transformation] of map_from_type_to_transformation_array[type].entries()) {
+              if(transformation.special === true) { // golden rule of algebra
+                if(type === GOLDEN_RULE_OF_ALGEBRA_TYPE) {
+                  div.append(get_golden_rule_radio_button_and_label(input, transformation_index, transformation.equality));
+                } else if(type === SHORTEN_TYPE) {
+                  div.append(get_shorten_radio_button_and_label(input, transformation_index, transformation.expression));
+                }
+              } else { // not golden rule of algebra
+                div.append($(get_html_of_transformation(input, transformation)));
+              }
+            }
+            if(type === GOLDEN_RULE_OF_ALGEBRA_TYPE) {
+              div.append($('<div id="' + GOLDEN_RULE_ACTION_DIV_CONTAINER_ID + '"></div>'));
+            } else if(type === SHORTEN_TYPE) {
+              div.append($('<div id="' + SHORTEN_ACTION_DIV_CONTAINER_ID + '"></div>'));
+            }
+            $('#transformation_container').append(div);
+          }
+          for(let component of dom_components) {
+            $('#transformation_container').append(component);
+          }
+        } catch (error) {
+          clear_transformations();
+          document.getElementById('transformation_container').innerHTML = "<p style='white-space: pre-wrap; font-family: monospace;'>" + String(error) + "</p>";
+          throw error;
+        }
+
+      }
+
+      function onLoad() {
+        document.getElementById("input").addEventListener("input", function(event) {
+            // Cancel the default action, if needed
+          event.preventDefault();
+
+          const input = event.target.value;
+          
+          if($('#history_scrollable_div').length !== 0 && input !== get_text_after_transformation(history[history.length - 1].string_before, history[history.length - 1])) {
+            let last_transformation = history[history.length - 1];
+            if(last_transformation.type === MANUAL_CHANGE_TYPE) {
+              last_transformation.replacement = input;
+              $('#' + HISTORY_ENTRY_DIV_PREFIX + String(history.length))
+                .empty()
+                .append(get_history_entry_div(history.length, input, last_transformation));
+            } else {
+              history_push('', {
+                location: 0,
+                num_chars: Infinity,
+                replacement: input,
+                type: MANUAL_CHANGE_TYPE
+              });
+            }
+          }
+
+          parse(input);
+        });
+      }
+    </script>
+  </head>
+  <body onLoad="onLoad();">
+    <div style='padding: 5px;'>
+      <h3>Algebra Tool</h3>
+      <p style='white-space: pre-wrap;'>
+        Algebra Tool can be used to solve equations or systems of equations.
+        Type one or more equations into the text box, separated by '&'.
+        Then click buttons to perform operations.
+        Equations must have one or more '=' characters.
+        The arithmetic operators '+', '-', '*', and '/' are supported.
+        All multiplication must use '*'.
+        Variable names may consist of any number of characters in a-z, A-Z, 0-9, or _.
+        Numbers may be written as integers, floating point (decimal) numbers, or scientific notation using the character 'e' as "times 10 to the power of".
+        Space characters (' ') are not allowed in the text box.
+        Algebra Tool is not expected to work in Internet Explorer.
+      </p>
+      
+      <div id='history_div_container'></div>
+      Enter equation(s) here:
+      <div float="top">
+        <input style='box-shadow: 0 0 50px blue; width: 100%;' type='text' id="input" autofocus="autofocus" />
+      </div>
+      
+      <!-- <div>
+        <button id="parse_button" onClick="parse();">PARSE!!!</button>
+      </div> -->
+      <div id='transformation_container' style="display: flex; flex-wrap: wrap;">
+        
+      </div>
+      <div id="results" float="bottom"></div>
+    </div>
+  </body>
+</html>

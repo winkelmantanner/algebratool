@@ -1,0 +1,12 @@
+-x=((+((-v12/(-Rb-x)*((Rc+x)+(+Rb+Ra)))/((-Rb/(-Rb-x)*((Rc+x)+(+Rb+Ra))-(+Rb+Ra))))*Rb*(+Ra+Rb)-(+Ra+Rb)*v12)+Rb*(+Vs-RS*((-v12/(-Rb-x)*((Rc+x)+(+Rb+Ra)))/((-Rb/(-Rb-x)*((Rc+x)+(+Rb+Ra))-(+Rb+Ra))))-Ra*((-v12/(-Rb-x)*((Rc+x)+(+Rb+Ra)))/((-Rb/(-Rb-x)*((Rc+x)+(+Rb+Ra))-(+Rb+Ra))))-Rb*((-v12/(-Rb-x)*((Rc+x)+(+Rb+Ra)))/((-Rb/(-Rb-x)*((Rc+x)+(+Rb+Ra))-(+Rb+Ra))))))/(+Vs-RS*((-v12/(-Rb-x)*((Rc+x)+(+Rb+Ra)))/((-Rb/(-Rb-x)*((Rc+x)+(+Rb+Ra))-(+Rb+Ra))))-Ra*((-v12/(-Rb-x)*((Rc+x)+(+Rb+Ra)))/((-Rb/(-Rb-x)*((Rc+x)+(+Rb+Ra))-(+Rb+Ra))))-Rb*((-v12/(-Rb-x)*((Rc+x)+(+Rb+Ra)))/((-Rb/(-Rb-x)*((Rc+x)+(+Rb+Ra))-(+Rb+Ra)))))&+z=(-v12/(-Rb-x)*((Rc+x)+(+Rb+Ra)))/((-Rb/(-Rb-x)*((Rc+x)+(+Rb+Ra))-(+Rb+Ra)))&y=(v12-z*Rb)/(-Rb-x)
+
+
+
+-w+s*z+a*(z-y)+(z-y)(b) = 0;
+c*y+x*y+b*(y-z)+a*(y-z) = 0;
+(z-y)*b-y*x = v12
+
+
+
+Rx=((+(+Ra+Rb)/(+Rs+Ra+Rb)*V12-V12)*(+1+Ra/Rb)+Rc/(+Rs+Ra+Rb)*Vs-Rc/Rb*V12)/(-Ra/Rb/Rb*V12+(+Ra/(+Rs+Ra+Rb)*Vs+V12*(+1+Ra/Rb))/Rb)
+
