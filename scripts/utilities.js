@@ -387,3 +387,9 @@ function history_push(input_before, transformation) {
   history_scrollable_div.append($('<hr style="margin: 3px;" />'));
   history_scrollable_div.append(get_history_entry_div(history.length, input_before, transformation));
 }
+
+function remove_spaces_from_content(input_element) {
+  const pos = input_element.selectionStart;
+  input_element.value = input_element.value.split('').filter(c => c !== ' ' && c !== '\t' && c !== '\n').join('');
+  input_element.selectionStart = input_element.selectionEnd = pos;
+}

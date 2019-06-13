@@ -81,6 +81,8 @@
             // Cancel the default action, if needed
           event.preventDefault();
 
+          remove_spaces_from_content(event.target);
+
           const input = event.target.value;
           
           if($('#history_scrollable_div').length !== 0 && input !== get_text_after_transformation(history[history.length - 1].string_before, history[history.length - 1])) {
