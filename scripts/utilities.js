@@ -386,6 +386,7 @@ function history_push(input_before, transformation) {
   }
   history_scrollable_div.append($('<hr style="margin: 3px;" />'));
   history_scrollable_div.append(get_history_entry_div(history.length, input_before, transformation));
+  history_scrollable_div[0].scrollTop = history_scrollable_div[0].scrollHeight;
 }
 
 function remove_spaces_from_content(input_element) {
