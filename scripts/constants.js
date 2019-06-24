@@ -55,5 +55,15 @@ SHORTEN_PRIORITIES[REMOVE_PARENTHESIS_TYPE] = Infinity;
 SHORTEN_PRIORITIES[SUBSTITUTE_TYPE] = undefined;
 
 
+const INITIAL_EXAMPLE_TYPE_DELAY = 1 * 1000; // milliseconds
+const EXAMPLE_TYPE_SPEED = 20 / 1000; // characters per millisecond
+const EXAMPLE_BACKSPACE_SPEED = 50 / 1000; // characters per millisecond
+const EXAMPLE_SHOWING_WAIT_TIME = 3 * 1000; // milliseconds
+const EXAMPLE_NOT_SHOWING_WAIT_TIME = 0.5 * 1000; // milliseconds
+const EXAMPLES = [
+  '(x-8)/(x+2)=6',
+  'x*y=PRODUCT&x*(COEFF*y-OFFSET)=4.54e3',
+  '-w+s*z+a*(z-y)+(z-y)*(b)=0&c*y+x*y+b*(y-z)+a*(y-z)=0&(z-y)*b-y*x=v12'
+];
 
 

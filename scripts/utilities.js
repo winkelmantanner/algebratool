@@ -488,6 +488,68 @@ function history_push(input_before, transformation) {
   history_scrollable_div[0].scrollTop = history_scrollable_div[0].scrollHeight;
 }
 
+function manage_history_on_input(input) {
+  if($('#history_scrollable_div').length !== 0 && input !== get_text_after_transformation(history[history.length - 1].string_before, history[history.length - 1])) {
+    let last_transformation = history[history.length - 1];
+    if(last_transformation.type === MANUAL_CHANGE_TYPE) {
+      last_transformation.replacement = input;
+      $('#' + HISTORY_ENTRY_DIV_PREFIX + String(history.length))
+        .empty()
+        .append(get_history_entry_div(history.length, input, last_transformation));
+    } else {
+      history_push('', {
+        location: 0,
+        num_chars: Infinity,
+        replacement: input,
+        type: MANUAL_CHANGE_TYPE
+      });
+    }
+  }
+}
+
+
+function type_example() {
+  if(!user_has_interacted) {
+    if(typing_state.length === 0) {
+      typing_state.push({growing: true, example_index: 0, char_index: 0, element: document.getElementById('input')});
+    }
+    typing_state.forEach((el, index) => {
+      let {element, example_index} = el;
+      if(el.growing) {
+        if(el.char_index < EXAMPLES[example_index].length) {
+          element.value += EXAMPLES[example_index][el.char_index];
+          el.char_index++;
+          setTimeout(type_example, 1 / EXAMPLE_TYPE_SPEED);
+        } else {
+          el.growing = false;
+          el.char_index--;
+          setTimeout(type_example, EXAMPLE_SHOWING_WAIT_TIME);
+        }
+      } else {
+        if(el.char_index >= 0) {
+          element.value = element.value.slice(0, el.char_index);
+          el.char_index--;
+          setTimeout(type_example, 1 / EXAMPLE_BACKSPACE_SPEED);
+        } else {
+          el.example_index = (el.example_index + 1) % EXAMPLES.length;
+          el.char_index++;
+          el.growing = true;
+          setTimeout(type_example, EXAMPLE_NOT_SHOWING_WAIT_TIME);
+        }
+      }
+      parse(element.value);
+    });
+  }
+}
+
+function on_user_interacts(input_element) {
+  if(!user_has_interacted) {
+    input_element.value = '';
+  }
+  user_has_interacted = true;
+  parse('');
+}
+
 function remove_spaces_from_content(input_element) {
   const pos = input_element.selectionStart;
   input_element.value = input_element.value.split('').filter(c => c !== ' ' && c !== '\t' && c !== '\n').join('');

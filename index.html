@@ -26,6 +26,8 @@
     <link rel="stylesheet" href="stylesheets/styles.css">
 
     <script type='text/javascript'>
+      let user_has_interacted = false;
+      let typing_state = [];
 
       const GOLDEN_RULE_ACTION_DIV_CONTAINER_ID = 'golden_rule_action_div_container';
       const SHORTEN_ACTION_DIV_CONTAINER_ID = 'shorten_action_div_container';
@@ -102,47 +104,57 @@
 
       }
 
+      function removeWelcomeBox() {
+        document.getElementById('welcome_container').innerHTML = '';
+      }
+
       function onLoad() {
         // $('#identity_editor').append(get_static_identity_editor_jquery_object());
         $('#enable_identities_checkbox').click(enable_identities_checkbox_onclick);
 
         document.getElementById("input").addEventListener("input", function(event) {
-            // Cancel the default action, if needed
-          event.preventDefault();
+          on_user_interacts(event.target);
 
           remove_spaces_from_content(event.target);
 
+          // Cancel the default action, if needed
+          event.preventDefault();
+
           const input = event.target.value;
           
-          if($('#history_scrollable_div').length !== 0 && input !== get_text_after_transformation(history[history.length - 1].string_before, history[history.length - 1])) {
-            let last_transformation = history[history.length - 1];
-            if(last_transformation.type === MANUAL_CHANGE_TYPE) {
-              last_transformation.replacement = input;
-              $('#' + HISTORY_ENTRY_DIV_PREFIX + String(history.length))
-                .empty()
-                .append(get_history_entry_div(history.length, input, last_transformation));
-            } else {
-              history_push('', {
-                location: 0,
-                num_chars: Infinity,
-                replacement: input,
-                type: MANUAL_CHANGE_TYPE
-              });
-            }
-          }
+          manage_history_on_input(input);
 
           parse(input);
         });
 
         parse('');
+
+        document.getElementById("input").addEventListener('click', function(event) {
+          on_user_interacts(event.target);
+        });
+
+        setTimeout(type_example, INITIAL_EXAMPLE_TYPE_DELAY);
       }
     </script>
   </head>
   <body onLoad="onLoad();">
+
     <div style='padding: 5px;'>
-      <h3>Algebra Tool</h3>
-      <p style='white-space: pre-wrap; text-indent: -50px;'>
-        Algebra Tool can be used to solve equations or systems of equations.
+      <div id='welcome_container'>
+        <div style='padding: 5px; border: 5px outset blue; box-shadow: 0px 0px 5px;' open>
+          <button onclick="removeWelcomeBox();" style='float: right; font-size: 20px;'>X</button>
+          <h3>Welcome to Algebra Tool!</h3>
+          Use this powerful tool to do Algebra!<br>
+          What it looks like:<br>
+          <img src='whatItLooksLike.png' style='box-shadow: 0px 0px 5px;' width='900px'/><br>
+          The box initially types its own content to show you what valid equations look like.<br>
+          Click in the box to enter your own equations.<br>
+          See if you can solve the equation in the image above for x!<br>
+          <button onclick="removeWelcomeBox();">close welcome box</button>
+        </div>
+      </div>
+
+      <p style='white-space: pre-wrap;'>
         Type one or more equations into the text box, separated by ';' or '&'.
         Then click buttons to perform operations.
         Equations must have one or more '=' characters.
@@ -157,7 +169,7 @@
       <div id='history_div_container'></div>
       Enter equation(s) here:
       <div float="top">
-        <input style='box-shadow: 0 0 50px blue; width: 100%;' type='text' id="input" autofocus="autofocus" />
+        <input style='box-shadow: 0 0 50px blue; width: 100%;' type='text' id="input" />
       </div>
       
       <!-- <div>
