@@ -394,3 +394,72 @@ function remove_spaces_from_content(input_element) {
   input_element.value = input_element.value.split('').filter(c => c !== ' ' && c !== '\t' && c !== '\n').join('');
   input_element.selectionStart = input_element.selectionEnd = pos;
 }
+
+
+function hash_array(array, delimiter = '') {
+  let hashes = array.map(hash_node);
+  hashes.sort();
+  return hashes.reduce(
+    (accumulator, next_hash) => {
+      return delimiter + accumulator + next_hash;
+    }, 
+    ''
+  );
+}
+
+
+let SPECIAL_HASH_TECHNIQUES = {
+  // 'main': (node) => hash_node(node.statement),
+  'statement': (node) => hash_array(node.b_term_array, '|'),
+  'b_term': (node) => hash_array(node.b_factor_array, '&'),
+  'b_factor': (node) => {
+      if(node.rule === BFACTOR_TO_PARENTHESISED_STATEMENT_RULE) {
+        return 'b(' + hash_node(node.statement) + ')';
+      } else { // node.rule === BFACTOR_TO_EQUALITY_RULE
+        return hash_node(node.equality);
+      }
+    },
+  'equality': (node) => hash_array(node.expression_array, '='),
+  'expression': (node) => hash_array(node.sign_u_term_pair_array, '+'),
+  'u_term': (node) => hash_array(node.operator_u_factor_pair_array, '*'),
+  'u_factor': (node) => {
+      if(node.rule === UFACTOR_TO_PARENTHESISTED_EXPRESSION_RULE) {
+        return 'u(' + hash_node(node.expression) + ')';
+      } else if(node.rule === UFACTOR_TO_UVARIABLE_RULE) {
+        return hash_node(node.u_variable);
+      } else { // node.rule === UFACTOR_TO_UNUMBER_RULE
+        return hash_node(node.u_number);
+      }
+    },
+  'u_number': (node) => String(node.value),
+  'u_variable': (node) => node.identifier,
+  'sign_u_term_pair': (node) => {
+      return (node.sign === null ? '+' : node.sign.char) + hash_node(node.u_term);
+    },
+  'operator_u_factor_pair': (node) => {
+      return (node.operator === null ? '*' : node.operator.char) + hash_node(node.u_factor);
+    }
+};
+function hash_node(node) {
+  // not a secure hash:
+  // this function will be used to determine if nodes are equivalent by order change
+  // and make nodes comparable
+  if(node.type in SPECIAL_HASH_TECHNIQUES) {
+    return SPECIAL_HASH_TECHNIQUES[node.type](node);
+  } else {
+    let key_array = [];
+    for(let key in node) {
+      if(key !== 'location' && key !== 'num_chars') {
+        let value = node[key];
+        if(Array.isArray(value)) {
+          return hash_array(value);
+        } else if(value !== null && typeof value === 'object' && value.type !== undefined) {
+          key_array.push(key);
+        }
+      }
+    }
+    key_array.sort();
+    return key_array.reduce((acc, next_key) => acc + hash_node(node[next_key]), '');
+  }
+}
+

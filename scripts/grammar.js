@@ -53,10 +53,10 @@ var grammar = {
     {"name": "expression$ebnf$2", "symbols": ["expression$ebnf$2", "expression$ebnf$2$subexpression$1"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "expression", "symbols": ["expression$ebnf$1", "u_term", "expression$ebnf$2"], "postprocess":  function([first_sign, first_u_term, sign_u_term_pairs], location) {
           // initialize sign_u_term_pair_array with first pair
-          let sign_u_term_pair_array = [construct_parse_tree_node('sign_u_term', '', {sign: first_sign, u_term: first_u_term}, location, (first_sign !== null ? first_sign.num_chars : 0) + first_u_term.num_chars)];
+          let sign_u_term_pair_array = [construct_parse_tree_node('sign_u_term_pair', '', {sign: first_sign, u_term: first_u_term}, location, (first_sign !== null ? first_sign.num_chars : 0) + first_u_term.num_chars)];
           // add pairs to sign_u_term_pair_array, while tallying num_chars
           for(let pair of sign_u_term_pairs) {
-            sign_u_term_pair_array.push(construct_parse_tree_node('sign_u_term', '', {sign: pair[0], u_term: pair[1]}, pair[0].location, pair[0].num_chars + pair[1].num_chars));
+            sign_u_term_pair_array.push(construct_parse_tree_node('sign_u_term_pair', '', {sign: pair[0], u_term: pair[1]}, pair[0].location, pair[0].num_chars + pair[1].num_chars));
           }
           return construct_parse_tree_node('expression', ADDITION_RULE, {sign_u_term_pair_array});
         } },
