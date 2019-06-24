@@ -27,11 +27,13 @@
       const GOLDEN_RULE_ACTION_DIV_CONTAINER_ID = 'golden_rule_action_div_container';
       const SHORTEN_ACTION_DIV_CONTAINER_ID = 'shorten_action_div_container';
 
+      const COMPILED_GRAMMAR = nearley.Grammar.fromCompiled(grammar);
+
 
       let history = []; // an array of transformations with an extra attribute: the string before the transformation
 
       function parse(input) {
-        let parser = new nearley.Parser(nearley.Grammar.fromCompiled(grammar));
+        let parser = new nearley.Parser(COMPILED_GRAMMAR);
         try {
           parser.feed(input);
           // document.getElementById("results").innerHTML = JSON.stringify(parser.results);

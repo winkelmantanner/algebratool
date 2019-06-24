@@ -34,7 +34,7 @@ function shorten(input, expression_object) {
       shortest_string = current_string;
     }
     try {
-      let expression_parser = new nearley.Parser(nearley.Grammar.fromCompiled(grammar));
+      let expression_parser = new nearley.Parser(COMPILED_GRAMMAR);
       expression_parser.feed(current_string);
       if(expression_parser.results.length === 0) {
         throw 'asdf';
