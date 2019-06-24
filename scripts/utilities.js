@@ -282,12 +282,12 @@ function get_golden_rule_action_div(input, equality) {
     let operator = operator_input_element.val();
     let expression = expression_input_element.val();
     try {
-      let operator_parser = new nearley.Parser(nearley.Grammar.fromCompiled(grammar));
+      let operator_parser = new nearley.Parser(COMPILED_GRAMMAR);
       operator_parser.feed("x=1" + operator + "z");
       if(operator_parser.results.length < 1) {
         throw "operator parser did not terminate";
       }
-      let expression_parser = new nearley.Parser(nearley.Grammar.fromCompiled(grammar));
+      let expression_parser = new nearley.Parser(COMPILED_GRAMMAR);
       expression_parser.feed('x=' + expression);
       if(expression_parser.results.length < 1) {
         throw "expression parser did not terminate";
