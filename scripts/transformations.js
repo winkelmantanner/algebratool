@@ -173,7 +173,7 @@ function* generate_sign_distribute_matches(input, node) {
   // order free
   const node_string = get_string(input, node);
   if(typeof node === 'object'
-    && node.type === 'sign_u_term'
+    && node.type === 'sign_u_term_pair'
     && node.u_term.rule === SCALE_RULE
   ) {
     if(node.u_term.operator_u_factor_pair_array.length > 1) {
