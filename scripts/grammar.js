@@ -60,6 +60,21 @@ var grammar = {
           }
           return construct_parse_tree_node('expression', ADDITION_RULE, {sign_u_term_pair_array});
         } },
+    {"name": "expression", "symbols": ["func"], "postprocess":  function([func]) {
+          return construct_parse_tree_node('expression', 'expression_to_func_rule', {func});
+        } },
+    {"name": "func$ebnf$1", "symbols": []},
+    {"name": "func$ebnf$1$subexpression$1", "symbols": ["comma", "expression"]},
+    {"name": "func$ebnf$1", "symbols": ["func$ebnf$1", "func$ebnf$1$subexpression$1"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
+    {"name": "func", "symbols": ["u_variable", "left_paren", "expression", "func$ebnf$1", "right_paren"], "postprocess":  function([u_variable, left_paren, first_expression, comma_expression_pair_array, right_paren]) {
+          return construct_parse_tree_node('func', 'func_rule', {
+            u_variable,
+            expression_array: [first_expression, ...comma_expression_pair_array.map(pair => pair[1])],
+            comma_array: comma_expression_pair_array.map(pair => pair[0]),
+            left_paren,
+            right_paren
+          });
+        } },
     {"name": "u_term$ebnf$1", "symbols": []},
     {"name": "u_term$ebnf$1$subexpression$1", "symbols": ["scale_operator", "u_factor"]},
     {"name": "u_term$ebnf$1", "symbols": ["u_term$ebnf$1", "u_term$ebnf$1$subexpression$1"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
@@ -133,6 +148,9 @@ var grammar = {
         } },
     {"name": "or_symbol", "symbols": [{"literal":"|"}], "postprocess":  function([char], location) {
           return construct_parse_tree_node('or_symbol', '"|"', {char}, location, char.length);
+        } },
+    {"name": "comma", "symbols": [{"literal":","}], "postprocess":  function([char], location) {
+          return construct_parse_tree_node('comma', '","', {char}, location, char.length);
         } }
 ]
   , ParserStart: "main"

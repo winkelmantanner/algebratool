@@ -1,6 +1,8 @@
 
 # u_ means unsigned
 
+# If you add to this, you might want to add to the hash function also
+
 main -> statement {% ([statement]) => construct_parse_tree_node('main', 'statement', {statement}) %}
 
 statement -> (b_term or_symbol):* b_term {% ([b_term_or_symbol_pair_array, final_b_term]) => {
@@ -45,6 +47,20 @@ expression -> sign:? u_term (sign u_term):* {% function([first_sign, first_u_ter
     sign_u_term_pair_array.push(construct_parse_tree_node('sign_u_term_pair', '', {sign: pair[0], u_term: pair[1]}, pair[0].location, pair[0].num_chars + pair[1].num_chars));
   }
   return construct_parse_tree_node('expression', ADDITION_RULE, {sign_u_term_pair_array});
+} %}
+
+expression -> func {% function([func]) {
+  return construct_parse_tree_node('expression', 'expression_to_func_rule', {func});
+} %}
+
+func -> u_variable left_paren expression (comma expression):* right_paren {% function([u_variable, left_paren, first_expression, comma_expression_pair_array, right_paren]) {
+  return construct_parse_tree_node('func', 'func_rule', {
+    u_variable,
+    expression_array: [first_expression, ...comma_expression_pair_array.map(pair => pair[1])],
+    comma_array: comma_expression_pair_array.map(pair => pair[0]),
+    left_paren,
+    right_paren
+  });
 } %}
 
 u_term -> u_factor (scale_operator u_factor):* {% function([first_u_factor, pair_array]) {
@@ -96,4 +112,8 @@ and_symbol -> "&" {% function([char], location) {
 } %}
 or_symbol -> "|" {% function([char], location) {
   return construct_parse_tree_node('or_symbol', '"|"', {char}, location, char.length);
+} %}
+
+comma -> "," {% function([char], location) {
+  return construct_parse_tree_node('comma', '","', {char}, location, char.length);
 } %}
