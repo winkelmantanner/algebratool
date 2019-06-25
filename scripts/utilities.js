@@ -401,13 +401,11 @@ function hash_array(array, delimiter = '') {
   hashes.sort();
   return hashes.reduce(
     (accumulator, next_hash) => {
-      return delimiter + accumulator + next_hash;
+      return accumulator + delimiter + next_hash;
     }, 
     ''
   );
 }
-
-
 let SPECIAL_HASH_TECHNIQUES = {
   // 'main': (node) => hash_node(node.statement),
   'statement': (node) => hash_array(node.b_term_array, '|'),
@@ -421,12 +419,15 @@ let SPECIAL_HASH_TECHNIQUES = {
     },
   'equality': (node) => hash_array(node.expression_array, '='),
   'expression': (node) => hash_array(node.sign_u_term_pair_array, '+'),
+  'func': (node) => node.u_variable.identifier + '(' + hash_array(node.expression_array, ',') + ')',
   'u_term': (node) => hash_array(node.operator_u_factor_pair_array, '*'),
   'u_factor': (node) => {
       if(node.rule === UFACTOR_TO_PARENTHESISTED_EXPRESSION_RULE) {
         return 'u(' + hash_node(node.expression) + ')';
       } else if(node.rule === UFACTOR_TO_UVARIABLE_RULE) {
         return hash_node(node.u_variable);
+      } else if(node.rule === UFACTOR_TO_FUNC_RULE) {
+        return hash_node(node.func);
       } else { // node.rule === UFACTOR_TO_UNUMBER_RULE
         return hash_node(node.u_number);
       }
