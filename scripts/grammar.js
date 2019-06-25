@@ -60,9 +60,6 @@ var grammar = {
           }
           return construct_parse_tree_node('expression', ADDITION_RULE, {sign_u_term_pair_array});
         } },
-    {"name": "expression", "symbols": ["func"], "postprocess":  function([func]) {
-          return construct_parse_tree_node('expression', 'expression_to_func_rule', {func});
-        } },
     {"name": "func$ebnf$1", "symbols": []},
     {"name": "func$ebnf$1$subexpression$1", "symbols": ["comma", "expression"]},
     {"name": "func$ebnf$1", "symbols": ["func$ebnf$1", "func$ebnf$1$subexpression$1"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
@@ -89,6 +86,9 @@ var grammar = {
         } },
     {"name": "u_factor", "symbols": ["left_paren", "expression", "right_paren"], "postprocess":  function([left_paren, expression, right_paren], location) {
           return construct_parse_tree_node('u_factor', UFACTOR_TO_PARENTHESISTED_EXPRESSION_RULE, {left_paren, expression, right_paren});
+        } },
+    {"name": "u_factor", "symbols": ["func"], "postprocess":  function([func]) {
+          return construct_parse_tree_node('u_factor', UFACTOR_TO_FUNC_RULE, {func});
         } },
     {"name": "u_factor", "symbols": ["u_variable"], "postprocess":  function([u_variable]) {
           return construct_parse_tree_node('u_factor', UFACTOR_TO_UVARIABLE_RULE, {u_variable});

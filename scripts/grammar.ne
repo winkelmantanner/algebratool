@@ -49,10 +49,6 @@ expression -> sign:? u_term (sign u_term):* {% function([first_sign, first_u_ter
   return construct_parse_tree_node('expression', ADDITION_RULE, {sign_u_term_pair_array});
 } %}
 
-expression -> func {% function([func]) {
-  return construct_parse_tree_node('expression', 'expression_to_func_rule', {func});
-} %}
-
 func -> u_variable left_paren expression (comma expression):* right_paren {% function([u_variable, left_paren, first_expression, comma_expression_pair_array, right_paren]) {
   return construct_parse_tree_node('func', 'func_rule', {
     u_variable,
@@ -75,6 +71,9 @@ u_term -> u_factor (scale_operator u_factor):* {% function([first_u_factor, pair
 
 u_factor -> left_paren expression right_paren {% function([left_paren, expression, right_paren], location) {
   return construct_parse_tree_node('u_factor', UFACTOR_TO_PARENTHESISTED_EXPRESSION_RULE, {left_paren, expression, right_paren});
+} %}
+u_factor -> func {% function([func]) {
+  return construct_parse_tree_node('u_factor', UFACTOR_TO_FUNC_RULE, {func});
 } %}
 
 u_factor -> u_variable {% function([u_variable]) {
