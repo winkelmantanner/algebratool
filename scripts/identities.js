@@ -20,11 +20,15 @@ function match_identity(target_node, identity_node, matches, extra = {}) {
     }
     if(identity_node.type === 'u_factor' && identity_node.rule === UFACTOR_TO_UVARIABLE_RULE) {
       if(identity_node.u_variable.identifier in matches) {
-        if(hash_node(matches[identity_node.u_variable.identifier]) === hash_node(target_node.identifier)) {
+        if(hash_node(matches[identity_node.u_variable.identifier].target_node) === hash_node(target_node.identifier)) {
+          matches.identity_match_position_pair_array.push({location: identity_node.location, num_chars: identity_node.num_chars});
           return true;
         }
       } else {
-        matches[identity_node.identifier] = target_node;
+        matches[identity_node.u_variable.identifier] = {
+          identity_match_position_pair_array: [{location: identity_node.location, num_chars: identity_node.num_chars}],
+          target_node
+        };
         return true;
       }
     } else if(Array.isArray(target_node) && Array.isArray(identity_node)){
