@@ -466,22 +466,26 @@ function hash_node(node) {
   // not a secure hash:
   // this function will be used to determine if nodes are equivalent by order change
   // and make nodes comparable
-  if(node.type in SPECIAL_HASH_TECHNIQUES) {
-    return SPECIAL_HASH_TECHNIQUES[node.type](node);
-  } else {
-    let key_array = [];
-    for(let key in node) {
-      if(key !== 'location' && key !== 'num_chars') {
-        let value = node[key];
-        if(Array.isArray(value)) {
-          return hash_array(value);
-        } else if(value !== null && typeof value === 'object' && value.type !== undefined) {
-          key_array.push(key);
+  if(node !== null && node !== undefined) {
+    if(node.type in SPECIAL_HASH_TECHNIQUES) {
+      return SPECIAL_HASH_TECHNIQUES[node.type](node);
+    } else {
+      let key_array = [];
+      for(let key in node) {
+        if(key !== 'location' && key !== 'num_chars') {
+          let value = node[key];
+          if(Array.isArray(value)) {
+            return hash_array(value);
+          } else if(value !== null && typeof value === 'object' && value.type !== undefined) {
+            key_array.push(key);
+          }
         }
       }
+      key_array.sort();
+      return key_array.reduce((acc, next_key) => acc + hash_node(node[next_key]), '');
     }
-    key_array.sort();
-    return key_array.reduce((acc, next_key) => acc + hash_node(node[next_key]), '');
+  } else {
+    return '';
   }
 }
 
