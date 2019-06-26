@@ -22,7 +22,8 @@ function get_array_of_transformation(input, parse_tree_node, array_ref = []) {
       generate_one_removal_matches,
       generate_reverse_distribute_matches,
       generate_substitution_replacements,
-      generate_shorten_transformations
+      generate_shorten_transformations,
+      generate_identity_match_transformations
     ]) {
       for(let match of generator_func(input, parse_tree_node)) {
         array_ref.push(match);
@@ -525,6 +526,36 @@ function* generate_shorten_transformations(input, node) {
         type: SHORTEN_TYPE,
         expression
       };
+    }
+  }
+}
+
+
+
+function* generate_identity_match_transformations(input, node) {
+  for(let identity_key in IDENTITIES) {
+    let identity = IDENTITIES[identity_key];
+    for(let side of identity.split('==')) {
+      let side_object = null;
+      let parser = new nearley.Parser(COMPILED_GRAMMAR);
+      if(side.indexOf('=') === -1) {
+        // assume it is an expression
+        parser.feed('x=' + side);
+        side_object = parser.results[0].statement.b_term_array[0].b_factor_array[0].equality.expression_array[1];
+      } else {
+        // assume it is an equality
+        parser.feed(side);
+        side_object = parser.results[0].statement.b_term_array[0].b_factor_array[0].equality;
+      }
+      let matches = {};
+      if(match_identity(node, side_object, matches)) {
+        yield {
+          location: node.location,
+          num_chars: node.num_chars,
+          replacement: "",
+          type: identity_key + " Identity"
+        }
+      }
     }
   }
 }
