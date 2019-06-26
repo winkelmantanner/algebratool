@@ -101,6 +101,27 @@ function join(char_array) {
 function get_text_after_transformation(input, transformation) {
   return input.slice(0, transformation.location) + transformation.replacement + input.slice(transformation.location + transformation.num_chars);
 }
+function get_text_after_multiple_transformations(input, transformation_array) {
+  // modifies transformation_array
+  transformation_array.sort((transf1, transf2) => {
+    if(transf1.location < transf2.location) {
+      return -1;
+    } else if(transf1.location > transf2.location) {
+      return 1;
+    } else {
+      return 0;
+    }
+  });
+  let end_of_prev_transf = 0;
+  let result = transformation_array.reduce((accumulator, transformation) => {
+    const returnable = accumulator + input.slice(end_of_prev_transf, transformation.location) + transformation.replacement;
+    end_of_prev_transf = transformation.location + transformation.num_chars;
+    return returnable;
+  }, '');
+  const last_transf = transformation_array[transformation_array.length - 1];
+  result += input.slice(last_transf.location + last_transf.num_chars);
+  return result;
+}
 
 let transformations_by_id = {};
 let current_transformation_id = 0;

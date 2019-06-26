@@ -3,6 +3,24 @@
 
 let INSTRUCTIONS_BY_TYPE = {};
 
+function traverse_parse_tree_preorder(parse_tree_node, node_callback) {
+  preorder_recursive(parse_tree_node, node_callback);
+  preorder_recursive(parse_tree_node, (node) => {}, true);
+}
+
+function preorder_recursive(parse_tree_node, node_callback, deleting_mark=false) {
+  if(typeof parse_tree_node === 'object' && parse_tree_node !== null && (deleting_mark ? MY_MARK_2 in parse_tree_node : !(MY_MARK_2 in parse_tree_node))) {
+    if(deleting_mark) {
+      delete parse_tree_node[MY_MARK_2];
+    } else {
+      parse_tree_node[MY_MARK_2] = true;
+    }
+    node_callback(parse_tree_node);
+    for(const key in parse_tree_node) {
+      preorder_recursive(parse_tree_node[key], node_callback);
+    }
+  }
+}
 
 function get_array_of_transformation(input, parse_tree_node, array_ref = []) {
   if(typeof parse_tree_node === 'object' && parse_tree_node !== null && !(MY_MARK in parse_tree_node)) {
@@ -531,28 +549,60 @@ function* generate_shorten_transformations(input, node) {
 }
 
 
+function get_all_variables(parse_tree) {
+  let map_from_variable_name_to_array_of_u_varaibles = {};
+  traverse_parse_tree_preorder(parse_tree, function(node) {
+    if(node.type === 'u_variable') {
+      if(!(node.identifier in map_from_variable_name_to_array_of_u_varaibles)) {
+        map_from_variable_name_to_array_of_u_varaibles[node.identifier] = [];
+      }
+      map_from_variable_name_to_array_of_u_varaibles[node.identifier].push(node);
+    }
+  });
+  return map_from_variable_name_to_array_of_u_varaibles;
+}
+
 
 function* generate_identity_match_transformations(input, node) {
   for(let identity_key in IDENTITIES) {
     let identity = IDENTITIES[identity_key];
-    for(let side of identity.split('==')) {
-      let side_object = null;
+    let side_strings = identity.split('==');
+    let side_objects = side_strings.map((side_string) => {
       let parser = new nearley.Parser(COMPILED_GRAMMAR);
-      if(side.indexOf('=') === -1) {
+      let side_object = null;
+      if(side_string.indexOf('=') === -1) {
         // assume it is an expression
-        parser.feed('x=' + side);
-        side_object = parser.results[0].statement.b_term_array[0].b_factor_array[0].equality.expression_array[1];
+        parser.feed(side_string + '=x');
+        side_object = parser.results[0].statement.b_term_array[0].b_factor_array[0].equality.expression_array[0];
       } else {
         // assume it is an equality
-        parser.feed(side);
+        parser.feed(side_string);
         side_object = parser.results[0].statement.b_term_array[0].b_factor_array[0].equality;
       }
+      return side_object;
+    });
+    for(let side_index = 0; side_index < side_strings.length; side_index++) {
+      // identity must contain only 1 '=='
+      // let current_side_string = side_strings[side_index];
+      let other_side_string = side_strings[1 - side_index];
+      let current_side_object = side_objects[side_index];
+      let other_side_object = side_objects[1 - side_index];
       let matches = {};
-      if(match_identity(node, side_object, matches)) {
+      if(match_identity(node, current_side_object, matches)) {
+        let map_from_variable_name_to_array_of_u_varaibles = get_all_variables(other_side_object);
+        let transf_array = [];
+        for(let identifier in map_from_variable_name_to_array_of_u_varaibles) {
+          for(let k = 0; k < map_from_variable_name_to_array_of_u_varaibles[identifier].length; k++) {
+            transf_array.push(object_spread(
+              {replacement: get_string(input, matches[identifier].target_node)},
+              map_from_variable_name_to_array_of_u_varaibles[identifier][k]
+            ));
+          }
+        }
         yield {
           location: node.location,
           num_chars: node.num_chars,
-          replacement: "",
+          replacement: "(" + get_text_after_multiple_transformations(other_side_string, transf_array) + ")",
           type: identity_key + " Identity"
         }
       }

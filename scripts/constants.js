@@ -1,6 +1,7 @@
 
 
 const MY_MARK = 'MY_MARK';
+const MY_MARK_2 = 'MY_MARK_2';
 const SHORTEN_SEARCH_LIMIT = 5000;
 
 const ADDITION_RULE = 'ADDITION_RULE';
