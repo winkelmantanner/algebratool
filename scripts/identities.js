@@ -18,13 +18,13 @@ function match_identity(target_node, identity_node, matches, extra = {}) {
     if(target_node.type === 'sign_u_term_pair') {
       extra.nearest_sign_u_term_pair_in_target = target_node;
     }
-    if((target_node.type === 'u_variable' || target_node.type === 'u_number') && identity_node.type === 'u_variable') {
-      if(identity_node.identifier in matches) {
-        if(matches[identity_node.identifier].identifier === target_node.identifier) {
+    if(identity_node.type === 'u_factor' && identity_node.rule === UFACTOR_TO_UVARIABLE_RULE) {
+      if(identity_node.u_variable.identifier in matches) {
+        if(hash_node(matches[identity_node.u_variable.identifier]) === hash_node(target_node.identifier)) {
           return true;
         }
       } else {
-        matches[identity_node.identifier] = extra.nearest_sign_u_term_pair_in_target;
+        matches[identity_node.identifier] = target_node;
         return true;
       }
     } else if(Array.isArray(target_node) && Array.isArray(identity_node)){
