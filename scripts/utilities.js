@@ -511,3 +511,17 @@ function permutator(inputArr) {
 
   return permute(inputArr);
 }
+
+
+function get_all_variables(parse_tree) {
+  let map_from_variable_name_to_array_of_u_varaibles = {};
+  traverse_parse_tree_preorder(parse_tree, function(node) {
+    if(node.type === 'u_variable') {
+      if(!(node.identifier in map_from_variable_name_to_array_of_u_varaibles)) {
+        map_from_variable_name_to_array_of_u_varaibles[node.identifier] = [];
+      }
+      map_from_variable_name_to_array_of_u_varaibles[node.identifier].push(node);
+    }
+  });
+  return map_from_variable_name_to_array_of_u_varaibles;
+}
