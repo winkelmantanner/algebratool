@@ -549,38 +549,9 @@ function* generate_shorten_transformations(input, node) {
 }
 
 
-function get_all_variables(parse_tree) {
-  let map_from_variable_name_to_array_of_u_varaibles = {};
-  traverse_parse_tree_preorder(parse_tree, function(node) {
-    if(node.type === 'u_variable') {
-      if(!(node.identifier in map_from_variable_name_to_array_of_u_varaibles)) {
-        map_from_variable_name_to_array_of_u_varaibles[node.identifier] = [];
-      }
-      map_from_variable_name_to_array_of_u_varaibles[node.identifier].push(node);
-    }
-  });
-  return map_from_variable_name_to_array_of_u_varaibles;
-}
-
-
 function* generate_identity_match_transformations(input, node) {
   for(let identity_key in IDENTITIES) {
-    let identity = IDENTITIES[identity_key];
-    let side_strings = identity.split('==');
-    let side_objects = side_strings.map((side_string) => {
-      let parser = new nearley.Parser(COMPILED_GRAMMAR);
-      let side_object = null;
-      if(side_string.indexOf('=') === -1) {
-        // assume it is an expression
-        parser.feed(side_string + '=x');
-        side_object = parser.results[0].statement.b_term_array[0].b_factor_array[0].equality.expression_array[0];
-      } else {
-        // assume it is an equality
-        parser.feed(side_string);
-        side_object = parser.results[0].statement.b_term_array[0].b_factor_array[0].equality;
-      }
-      return side_object;
-    });
+    let {side_strings, side_objects} = get_sides_from_identity_with_given_key(identity_key);
     for(let side_index = 0; side_index < side_strings.length; side_index++) {
       // identity must contain only 1 '=='
       // let current_side_string = side_strings[side_index];
@@ -593,9 +564,15 @@ function* generate_identity_match_transformations(input, node) {
         let transf_array = [];
         for(let identifier in map_from_variable_name_to_array_of_u_varaibles) {
           for(let k = 0; k < map_from_variable_name_to_array_of_u_varaibles[identifier].length; k++) {
+            let u_variable = map_from_variable_name_to_array_of_u_varaibles[identifier][k];
+            let {location, num_chars} = u_variable;
+            if('+-'.indexOf(other_side_string[location - 1]) !== -1) {
+              location -= 1;
+              num_chars += 1;
+            }
             transf_array.push(object_spread(
-              {replacement: get_string(input, matches[identifier].target_node)},
-              map_from_variable_name_to_array_of_u_varaibles[identifier][k]
+              {replacement: (matches[identifier].nearest_sign_u_term_pair_in_target.sign || {char:''}).char + get_string(input, matches[identifier].target_node)},
+              {location, num_chars}
             ));
           }
         }
