@@ -20,8 +20,8 @@ function match_identity(target_node, identity_node, matches, extra = {}) {
     }
     if(identity_node.type === 'u_factor' && identity_node.rule === UFACTOR_TO_UVARIABLE_RULE) {
       if(identity_node.u_variable.identifier in matches) {
-        if(hash_node(matches[identity_node.u_variable.identifier].target_node) === hash_node(target_node.identifier)) {
-          matches.identity_match_position_pair_array.push({location: identity_node.location, num_chars: identity_node.num_chars});
+        if(hash_node(matches[identity_node.u_variable.identifier].target_node) === hash_node(target_node)) {
+          matches[identity_node.u_variable.identifier].identity_match_position_pair_array.push({location: identity_node.location, num_chars: identity_node.num_chars});
           return true;
         }
       } else {
@@ -40,6 +40,7 @@ function match_identity(target_node, identity_node, matches, extra = {}) {
         }
         return true;
       } else {
+        
         return false;
       }
     } else if(target_node.type === identity_node.type && target_node.rule === identity_node.rule) {
