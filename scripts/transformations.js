@@ -3,21 +3,21 @@
 
 let INSTRUCTIONS_BY_TYPE = {};
 
-function traverse_parse_tree_preorder(parse_tree_node, node_callback) {
-  preorder_recursive(parse_tree_node, node_callback);
-  preorder_recursive(parse_tree_node, (node) => {}, true);
+function traverse_parse_tree_preorder(parse_tree_node, node_callback, initial_parent_returned = {}) {
+  preorder_recursive(parse_tree_node, node_callback, initial_parent_returned);
+  preorder_recursive(parse_tree_node, (node) => {}, initial_parent_returned, true);
 }
 
-function preorder_recursive(parse_tree_node, node_callback, deleting_mark=false) {
+function preorder_recursive(parse_tree_node, node_callback, parent_returned, deleting_mark=false) {
   if(typeof parse_tree_node === 'object' && parse_tree_node !== null && (deleting_mark ? MY_MARK_2 in parse_tree_node : !(MY_MARK_2 in parse_tree_node))) {
     if(deleting_mark) {
       delete parse_tree_node[MY_MARK_2];
     } else {
       parse_tree_node[MY_MARK_2] = true;
     }
-    node_callback(parse_tree_node);
+    let returned = node_callback(parse_tree_node, parent_returned);
     for(const key in parse_tree_node) {
-      preorder_recursive(parse_tree_node[key], node_callback);
+      preorder_recursive(parse_tree_node[key], node_callback, returned);
     }
   }
 }
