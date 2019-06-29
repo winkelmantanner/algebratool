@@ -85,6 +85,32 @@ function match_identity(target_node, identity_node, matches, nearest_sign_u_term
 }
 
 
+function get_first_significant_descendant(node) {
+  let significant_keys = [];
+  for(const key in node) {
+    if(typeof node[key] === 'object' && node[key] !== null) {
+      significant_keys.push(key);
+    }
+  }
+  if(significant_keys.length >= 2) {
+    return node;
+  } else if(significant_keys.length === 1) {
+    const child = node[significant_keys[0]];
+    if(Array.isArray(child)) {
+      let first_significant_descendant = get_first_significant_descendant(child);
+      if(first_significant_descendant === child) {
+        return node;
+      } else {
+        return first_significant_descendant;
+      }
+    } else {
+      return get_first_significant_descendant(child);
+    }
+  } else { // node is a terminal
+    return node;
+  }
+}
+
 function get_sides_from_identity_with_given_key(identity_key) {
   if(!(identity_key in computed_side_data)) {
     let identity = IDENTITIES[identity_key];
@@ -95,7 +121,7 @@ function get_sides_from_identity_with_given_key(identity_key) {
       if(side_string.indexOf('=') === -1) {
         // assume it is an expression
         parser.feed(side_string + '=x');
-        side_object = parser.results[0].statement.b_term_array[0].b_factor_array[0].equality.expression_array[0];
+        side_object = get_first_significant_descendant(parser.results[0].statement.b_term_array[0].b_factor_array[0].equality.expression_array[0]);
       } else {
         // assume it is an equality
         parser.feed(side_string);
