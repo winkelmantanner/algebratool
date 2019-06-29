@@ -202,12 +202,15 @@ function get_char_of_multiplied_sign_objects(sign_object_1, sign_object_2) {
   if(sign_object_1 === null && sign_object_2 === null) return null;
   if(sign_object_1 === null) return sign_object_2.char;
   if(sign_object_2 === null) return sign_object_1.char;
+  return get_char_of_multiplied_sign_chars(sign_object_1.char, sign_object_2.char);
+}
+function get_char_of_multiplied_sign_chars(sign_char_1, sign_char_2) {
   return {
     '++': '+',
     '+-': '-',
     '-+': '-',
     '--': '+'
-  }[sign_object_1.char + sign_object_2.char];
+  }[sign_char_1 + sign_char_2];
 }
 function get_char_of_multiplied_operator_objects(operator_object_1, operator_object_2) {
   if(operator_object_1 === null && operator_object_2 === null) return null;
@@ -513,15 +516,38 @@ function permutator(inputArr) {
 }
 
 
-function get_all_variables(parse_tree) {
-  let map_from_variable_name_to_array_of_u_varaibles = {};
-  traverse_parse_tree_preorder(parse_tree, function(node) {
+function get_all_variables_and_nearest_sign_u_term_pair(parse_tree) {
+  // return type structure:
+  // {VARIABLE_NAME: [{u_variable: u_variable node object, nearest_sign_u_term_pair: sign_u_term_pair node object}]}
+  let map_from_variable_name_to_array_of_objects = {};
+  traverse_parse_tree_preorder(parse_tree, function(node, parent_returned) {
     if(node.type === 'u_variable') {
-      if(!(node.identifier in map_from_variable_name_to_array_of_u_varaibles)) {
-        map_from_variable_name_to_array_of_u_varaibles[node.identifier] = [];
+      if(!(node.identifier in map_from_variable_name_to_array_of_objects)) {
+        map_from_variable_name_to_array_of_objects[node.identifier] = [];
       }
-      map_from_variable_name_to_array_of_u_varaibles[node.identifier].push(node);
+      map_from_variable_name_to_array_of_objects[node.identifier].push({u_variable: node, nearest_sign_u_term_pair: parent_returned});
+    } else if(node.type === 'sign_u_term_pair') {
+      return node;
     }
+    return parent_returned;
   });
-  return map_from_variable_name_to_array_of_u_varaibles;
+  return map_from_variable_name_to_array_of_objects;
+}
+
+
+function group(groupingAttribute, object) {
+  let arr = [];
+  let index_meanings = [];
+  for(let key in object) {
+    for(let object_inner of object[key]) {
+      let foundIndex = arr.indexOf(object_inner[groupingAttribute]);
+      if(foundIndex === -1) {
+        arr.push(object_inner[groupingAttribute]);
+        index_meanings.push([object_inner]);
+      } else {
+        index_meanings[foundIndex].push(object_inner);
+      }
+    }
+  }
+  return index_meanings;
 }
