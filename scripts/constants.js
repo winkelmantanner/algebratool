@@ -18,6 +18,7 @@ const UFACTOR_TO_UVARIABLE_RULE = 'UFACTOR_TO_UVARIABLE_RULE';
 const UFACTOR_TO_FUNC_RULE = 'UFACTOR_TO_FUNC_RULE';
 
 
+// Careful changing these.  Make sure anywhere the value appears also gets changed.
 const COMBINE_NUMBER_TYPE = 'Combine Numbers';
 const CHANGE_ORDER_TYPE = 'Change Order';
 const DISTRIBUTE_SIGN_TYPE = 'Distribute Sign';

@@ -47,24 +47,26 @@
             }
             map_from_type_to_transformation_array[t.type].push(t);
           }
-          for(let type in map_from_type_to_transformation_array) {
+          for(let type in INSTRUCTIONS_BY_TYPE) {
             let div = $('<div float="left" class="transformation_box card"></div>');
             div.append($(get_transformation_header_html(type)));
-            for(let [transformation_index, transformation] of map_from_type_to_transformation_array[type].entries()) {
-              if(transformation.special === true) { // golden rule of algebra
-                if(type === GOLDEN_RULE_OF_ALGEBRA_TYPE) {
-                  div.append(get_golden_rule_radio_button_and_label(input, transformation_index, transformation.equality));
-                } else if(type === SHORTEN_TYPE) {
-                  div.append(get_shorten_radio_button_and_label(input, transformation_index, transformation.expression));
+            if(type in map_from_type_to_transformation_array) {
+              for(let [transformation_index, transformation] of map_from_type_to_transformation_array[type].entries()) {
+                if(transformation.special === true) { // golden rule of algebra
+                  if(type === GOLDEN_RULE_OF_ALGEBRA_TYPE) {
+                    div.append(get_golden_rule_radio_button_and_label(input, transformation_index, transformation.equality));
+                  } else if(type === SHORTEN_TYPE) {
+                    div.append(get_shorten_radio_button_and_label(input, transformation_index, transformation.expression));
+                  }
+                } else { // not golden rule of algebra
+                  div.append($(get_html_of_transformation(input, transformation)));
                 }
-              } else { // not golden rule of algebra
-                div.append($(get_html_of_transformation(input, transformation)));
               }
-            }
-            if(type === GOLDEN_RULE_OF_ALGEBRA_TYPE) {
-              div.append($('<div id="' + GOLDEN_RULE_ACTION_DIV_CONTAINER_ID + '"></div>'));
-            } else if(type === SHORTEN_TYPE) {
-              div.append($('<div id="' + SHORTEN_ACTION_DIV_CONTAINER_ID + '"></div>'));
+              if(type === GOLDEN_RULE_OF_ALGEBRA_TYPE) {
+                div.append($('<div id="' + GOLDEN_RULE_ACTION_DIV_CONTAINER_ID + '"></div>'));
+              } else if(type === SHORTEN_TYPE) {
+                div.append($('<div id="' + SHORTEN_ACTION_DIV_CONTAINER_ID + '"></div>'));
+              }
             }
             $('#transformation_container').append(div);
           }
@@ -107,6 +109,8 @@
 
           parse(input);
         });
+
+        parse('');
       }
     </script>
   </head>
