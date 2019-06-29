@@ -555,3 +555,20 @@ function group(groupingAttribute, object) {
   }
   return index_meanings;
 }
+
+function get_string_of_u_factor_that_either_goes_to_u_variable_or_u_number(
+  u_factor_that_either_goes_to_u_variable_or_u_number,
+  ONLY_ONE_PARAMETER
+) {
+  if(ONLY_ONE_PARAMETER !== undefined) {
+    throw "get_string_of_u_variable_or_u_number got 2 parameters; it should only get 1";
+  }
+  let string = null;
+  if(u_factor_that_either_goes_to_u_variable_or_u_number.rule === UFACTOR_TO_UVARIABLE_RULE) {
+    string = u_factor_that_either_goes_to_u_variable_or_u_number.u_variable.identifier;
+  } else if(u_factor_that_either_goes_to_u_variable_or_u_number.rule === UFACTOR_TO_UNUMBER_RULE) {
+    string = String(u_factor_that_either_goes_to_u_variable_or_u_number.u_number.value);
+  }
+  return string;
+}
+

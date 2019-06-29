@@ -2,15 +2,12 @@
 
 
 const IDENTITIES = {
-  // '2-dist': 'a*(b+c)==a*b+a*c'
-  // 'distributive': 'a*(sum(term))==sum(a*term)',
-  // 'substitution': '(x=a&y=f(x))==x=a&y=f(a)',
   'Pythagorean': 'cos(zxcv)*cos(zxcv)+sin(zxcv)*sin(zxcv)==1',
   'Tangent Cofunction': 'cot(t)==tan((3.14159/2)-t)',
-  'Product To Sum': 'sin(a)*cos(b)==(1/2)*(sin(a+b)+sin(a-b))',
-  'Product To Sum': 'cos(a)*sin(b)==(1/2)*(sin(a+b)-sin(a-b))',
-  'Product To Sum': 'sin(a)*sin(b)==(1/2)*(cos(a-b)-cos(a+b))',
-  'Product To Sum': 'cos(a)*cos(b)==(1/2)*(cos(a+b)+cos(a-b))'
+  'Product To Sum (sin times cos)': 'sin(a)*cos(b)==(1/2)*(sin(a+b)+sin(a-b))',
+  'Product To Sum (cos times sin)': 'cos(a)*sin(b)==(1/2)*(sin(a+b)-sin(a-b))',
+  'Product To Sum (sin times sin)': 'sin(a)*sin(b)==(1/2)*(cos(a-b)-cos(a+b))',
+  'Product To Sum (cos times cos)': 'cos(a)*cos(b)==(1/2)*(cos(a+b)+cos(a-b))'
 };
 let computed_side_data = {};
 
@@ -32,18 +29,27 @@ function match_identity(target_node, identity_node, matches, nearest_sign_u_term
     }
     if(identity_node.type === 'u_number' && target_node.type === 'u_number') {
       return identity_node.value === target_node.value;
-    } else if(identity_node.type === 'u_factor' && identity_node.rule === UFACTOR_TO_UVARIABLE_RULE) {
-      // look for u_factor, don't pick up on function names
+    } else if(
+      target_node.type === 'u_factor'
+      && (
+        target_node.rule === UFACTOR_TO_UVARIABLE_RULE
+        || target_node.rule === UFACTOR_TO_UNUMBER_RULE
+      )
+      && identity_node.type === 'u_factor'
+      && identity_node.rule === UFACTOR_TO_UVARIABLE_RULE
+    ) {
+      // look for u_factor; don't pick up on function names
       let identity_u_variable = identity_node.u_variable;
       if(identity_node.u_variable.identifier in matches) {
-        if(matches[identity_u_variable.identifier].target_node.u_variable.identifier === target_node.u_variable.identifier) {
+        if(matches[identity_u_variable.identifier].corresponding_string === get_string_of_u_factor_that_either_goes_to_u_variable_or_u_number(target_node)) {
           matches[identity_u_variable.identifier].identity_match_position_pair_array.push({location: identity_node.location, num_chars: identity_node.num_chars});
           return true;
         }
       } else {
         matches[identity_u_variable.identifier] = {
           identity_match_position_pair_array: [{location: identity_node.location, num_chars: identity_node.num_chars}],
-          target_node,
+          target_u_factor: target_node,
+          corresponding_string: get_string_of_u_factor_that_either_goes_to_u_variable_or_u_number(target_node),
           nearest_sign_u_term_pair_in_target
         };
         return true;
