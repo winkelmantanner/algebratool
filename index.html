@@ -47,7 +47,13 @@
             }
             map_from_type_to_transformation_array[t.type].push(t);
           }
-          for(let type in INSTRUCTIONS_BY_TYPE) {
+          let types = Object.keys(INSTRUCTIONS_BY_TYPE);
+          for(let key in map_from_type_to_transformation_array) {
+            if(types.indexOf(key) === -1) {
+              types.push(key);
+            }
+          }
+          for(let type of types) {
             let div = $('<div float="left" class="transformation_box card"></div>');
             div.append($(get_transformation_header_html(type)));
             if(type in map_from_type_to_transformation_array) {
@@ -57,6 +63,8 @@
                     div.append(get_golden_rule_radio_button_and_label(input, transformation_index, transformation.equality));
                   } else if(type === SHORTEN_TYPE) {
                     div.append(get_shorten_radio_button_and_label(input, transformation_index, transformation.expression));
+                  } else if('message' in transformation) {
+                    div.append($('<span>' + transformation.message + '</span>'));
                   }
                 } else { // not golden rule of algebra
                   div.append($(get_html_of_transformation(input, transformation)));

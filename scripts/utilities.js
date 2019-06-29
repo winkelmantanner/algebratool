@@ -118,8 +118,12 @@ function get_text_after_multiple_transformations(input, transformation_array) {
     end_of_prev_transf = transformation.location + transformation.num_chars;
     return returnable;
   }, '');
-  const last_transf = transformation_array[transformation_array.length - 1];
-  result += input.slice(last_transf.location + last_transf.num_chars);
+  if(transformation_array.length > 0) {
+    const last_transf = transformation_array[transformation_array.length - 1];
+    result += input.slice(last_transf.location + last_transf.num_chars);
+  } else {
+    return input;
+  }
   return result;
 }
 
@@ -521,11 +525,11 @@ function get_all_variables_and_nearest_sign_u_term_pair(parse_tree) {
   // {VARIABLE_NAME: [{u_variable: u_variable node object, nearest_sign_u_term_pair: sign_u_term_pair node object}]}
   let map_from_variable_name_to_array_of_objects = {};
   traverse_parse_tree_preorder(parse_tree, function(node, parent_returned) {
-    if(node.type === 'u_variable') {
-      if(!(node.identifier in map_from_variable_name_to_array_of_objects)) {
-        map_from_variable_name_to_array_of_objects[node.identifier] = [];
+    if(node.type === 'u_factor' && node.rule === UFACTOR_TO_UVARIABLE_RULE) {
+      if(!(node.u_variable.identifier in map_from_variable_name_to_array_of_objects)) {
+        map_from_variable_name_to_array_of_objects[node.u_variable.identifier] = [];
       }
-      map_from_variable_name_to_array_of_objects[node.identifier].push({u_variable: node, nearest_sign_u_term_pair: parent_returned});
+      map_from_variable_name_to_array_of_objects[node.u_variable.identifier].push({u_variable: node.u_variable, nearest_sign_u_term_pair: parent_returned});
     } else if(node.type === 'sign_u_term_pair') {
       return node;
     }
