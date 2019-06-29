@@ -2,10 +2,11 @@
 
 
 const IDENTITIES = {
-  '2-dist': 'a*(b+c)==a*b+a*c'
+  // '2-dist': 'a*(b+c)==a*b+a*c'
   // 'distributive': 'a*(sum(term))==sum(a*term)',
   // 'substitution': '(x=a&y=f(x))==x=a&y=f(a)',
-  // 'pythagorean': 'cos(x)*cos(x)+sin(x)*sin(x)==1'
+  'Pythagorean': 'cos(x)*cos(x)+sin(x)*sin(x)==1',
+  'Tangent Cofunction': 'cot(t)==tan((3.14159/2)-t)'
 };
 let computed_side_data = {};
 
@@ -14,19 +15,23 @@ let computed_side_data = {};
 function match_identity(target_node, identity_node, matches, nearest_sign_u_term_pair_in_target = null) {
   // target_node: a node in the parse tree of the input
   // identity_node: a node in the parse tree of the identity
-  // matches: a map from identity variable name to input parse tree object reference
+  // matches: {identifier in identity: {identity_match_position_pair_array: [{location, num_chars}], target_node, nearest_sign_u_term_pair_in_target}}
   if(typeof target_node === 'object' && target_node !== null && typeof identity_node === 'object' && identity_node !== null) {
     if(target_node.type === 'sign_u_term_pair') {
       nearest_sign_u_term_pair_in_target = target_node;
     }
-    if(identity_node.type === 'u_factor' && identity_node.rule === UFACTOR_TO_UVARIABLE_RULE) {
+    if(identity_node.type === 'u_number' && target_node.type === 'u_number') {
+      return identity_node.value === target_node.value;
+    } else if(identity_node.type === 'u_factor' && identity_node.rule === UFACTOR_TO_UVARIABLE_RULE) {
+      // look for u_factor, don't pick up on function names
+      let identity_u_variable = identity_node.u_variable;
       if(identity_node.u_variable.identifier in matches) {
-        if(hash_node(matches[identity_node.u_variable.identifier].target_node) === hash_node(target_node)) {
-          matches[identity_node.u_variable.identifier].identity_match_position_pair_array.push({location: identity_node.location, num_chars: identity_node.num_chars});
+        if(matches[identity_u_variable.identifier].target_node.u_variable.identifier === identity_u_variable.identifier) {
+          matches[identity_u_variable.identifier].identity_match_position_pair_array.push({location: identity_node.location, num_chars: identity_node.num_chars});
           return true;
         }
       } else {
-        matches[identity_node.u_variable.identifier] = {
+        matches[identity_u_variable.identifier] = {
           identity_match_position_pair_array: [{location: identity_node.location, num_chars: identity_node.num_chars}],
           target_node,
           nearest_sign_u_term_pair_in_target
@@ -42,7 +47,6 @@ function match_identity(target_node, identity_node, matches, nearest_sign_u_term
         }
         return true;
       } else {
-        
         return false;
       }
     } else if(target_node.type === identity_node.type && target_node.rule === identity_node.rule) {
@@ -50,8 +54,7 @@ function match_identity(target_node, identity_node, matches, nearest_sign_u_term
       for(let key in target_node) {
         if(target_node[key] === null ^ identity_node[key] === null) {
           return false;
-        }
-        if(typeof target_node[key] === 'object' && target_node[key] !== null) {
+        } else if(typeof target_node[key] === 'object' && target_node[key] !== null) {
           child_keys.push(key);
         }
       }

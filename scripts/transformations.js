@@ -41,7 +41,7 @@ function get_array_of_transformation(input, parse_tree_node, array_ref = []) {
       generate_reverse_distribute_matches,
       generate_substitution_replacements,
       generate_shorten_transformations,
-      // generate_identity_match_transformations
+      generate_identity_match_transformations
     ]) {
       for(let match of generator_func(input, parse_tree_node)) {
         array_ref.push(match);
@@ -560,39 +560,33 @@ function* generate_identity_match_transformations(input, node) {
       let other_side_object = side_objects[1 - side_index];
       let matches = {};
       if(match_identity(node, current_side_object, matches)) {
-        let map_from_variable_name_to_array_of_objects = get_all_variables_and_nearest_sign_u_term_pair(other_side_object);
-        let transf_array = [];
-        let array_of_arrays_of_objects = group('nearest_sign_u_term_pair', map_from_variable_name_to_array_of_objects);
-        for(let array_of_objects of array_of_arrays_of_objects) {
-          let {u_variable, nearest_sign_u_term_pair} = array_of_objects[0];
-          let {location, num_chars} = nearest_sign_u_term_pair;
-          let sign_char = array_of_objects.reduce((aggregated_sign_char, next_object) => {
-            return get_char_of_multiplied_sign_objects({char: aggregated_sign_char}, matches[next_object.u_variable.identifier].nearest_sign_u_term_pair_in_target.sign);
-          }, '+');
-          sign_char = get_char_of_multiplied_sign_objects({char: sign_char}, nearest_sign_u_term_pair.sign);
-          transf_array.push(object_spread(
-            {replacement: sign_char + nearest_sign_u_term_pair.u_term.operator_u_factor_pair_array.reduce((ag, operator_u_factor_pair) => {
-              return ag + get_string(other_side_string, operator_u_factor_pair.operator) + matches[operator_u_factor_pair.u_factor.u_variable.identifier].target_node.identifier;
-            }, '')},
-            {location, num_chars}
-          ));
-        }
-        // for(let identifier in map_from_variable_name_to_array_of_objects) {
-        //   for(let k = 0; k < map_from_variable_name_to_array_of_objects[identifier].length; k++) {
-        //     let {u_variable, nearest_sign_u_term_pair} = map_from_variable_name_to_array_of_objects[identifier][k];
-        //     let {location, num_chars} = nearest_sign_u_term_pair;
-            
-        //     transf_array.push(object_spread(
-        //       {replacement: get_char_of_multiplied_sign_objects(nearest_sign_u_term_pair.sign, matches[identifier].nearest_sign_u_term_pair_in_target.sign) + get_string(input, matches[identifier].target_node)},
-        //       {location, num_chars}
-        //     ));
-        //   }
-        // }
-        yield {
-          location: node.location,
-          num_chars: node.num_chars,
-          replacement: "(" + get_text_after_multiple_transformations(other_side_string, transf_array) + ")",
-          type: identity_key + " Identity"
+        const other_side_replacable_data = get_all_variables_and_nearest_sign_u_term_pair(other_side_object);
+        if(Object.keys(other_side_replacable_data).every(identifier => identifier in matches)) {
+          let transformation_array = [];
+          for(let identity_identifier in other_side_replacable_data) {
+            const replacement = matches[identity_identifier].target_node.u_variable.identifier;
+            for(let replacement_datum of other_side_replacable_data[identity_identifier]) {
+              const {location, num_chars} = replacement_datum.u_variable;
+              transformation_array.push(
+                object_spread(
+                  {location, num_chars},
+                  {replacement}
+                )
+              );
+            }
+          }
+          yield {
+            location: node.location,
+            num_chars: node.num_chars,
+            replacement: "(" + get_text_after_multiple_transformations(other_side_string, transformation_array) + ")",
+            type: identity_key + " Identity"
+          }
+        } else {
+          yield {
+            special: true,
+            message: "One side of the identity matched, but a button could not be generated because the other side contained a variable that the matched side did not contain, so Algebra Tool didn't know what to substitute for the variable on the other side.",
+            type: identity_key + " Identity"
+          }
         }
       }
     }
