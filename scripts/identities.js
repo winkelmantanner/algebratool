@@ -20,6 +20,12 @@ function match_identity(target_node, identity_node, matches, nearest_sign_u_term
     if(target_node.type === 'sign_u_term_pair') {
       nearest_sign_u_term_pair_in_target = target_node;
     }
+    if(identity_node.type === 'func'
+      && target_node.type === 'func'
+      && identity_node.u_variable.identifier !== target_node.u_variable.identifier
+    ) {
+      return false;
+    }
     if(identity_node.type === 'u_number' && target_node.type === 'u_number') {
       return identity_node.value === target_node.value;
     } else if(identity_node.type === 'u_factor' && identity_node.rule === UFACTOR_TO_UVARIABLE_RULE) {
@@ -50,11 +56,14 @@ function match_identity(target_node, identity_node, matches, nearest_sign_u_term
         return false;
       }
     } else if(target_node.type === identity_node.type && target_node.rule === identity_node.rule) {
+      if(identity_node.type === 'sign_u_term_pair') { // target_node.type === 'sign_u_term_pair'
+        if(get_char_of_multiplied_sign_objects(identity_node.sign, target_node.sign) === '-') {
+          return false;
+        }
+      }
       let child_keys = [];
       for(let key in target_node) {
-        if(target_node[key] === null ^ identity_node[key] === null) {
-          return false;
-        } else if(typeof target_node[key] === 'object' && target_node[key] !== null) {
+        if(key !== 'sign' && typeof target_node[key] === 'object' && target_node[key] !== null) {
           child_keys.push(key);
         }
       }
