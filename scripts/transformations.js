@@ -41,7 +41,7 @@ function get_array_of_transformation(input, parse_tree_node, array_ref = []) {
       generate_reverse_distribute_matches,
       generate_substitution_replacements,
       generate_shorten_transformations,
-      generate_identity_match_transformations
+      // generate_identity_match_transformations
     ]) {
       for(let match of generator_func(input, parse_tree_node)) {
         array_ref.push(match);
@@ -573,7 +573,7 @@ function* generate_identity_match_transformations(input, node) {
           transf_array.push(object_spread(
             {replacement: sign_char + nearest_sign_u_term_pair.u_term.operator_u_factor_pair_array.reduce((ag, operator_u_factor_pair) => {
               return ag + get_string(other_side_string, operator_u_factor_pair.operator) + matches[operator_u_factor_pair.u_factor.u_variable.identifier].target_node.identifier;
-            })},
+            }, '')},
             {location, num_chars}
           ));
         }

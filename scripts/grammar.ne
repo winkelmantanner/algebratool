@@ -11,8 +11,8 @@ statement -> (b_term or_symbol):* b_term {% ([b_term_or_symbol_pair_array, final
   return construct_parse_tree_node('statement', DISJUNCTION_RULE, {b_term_array});
 } %}
 
-b_term -> (b_factor and_symbol):* b_factor {% ([b_factor_and_symbol_pair_array, final_b_factor]) => {
-  let b_factor_array = b_factor_and_symbol_pair_array.map(pair => pair[0]);
+b_term -> (b_factor (and_symbol | semicolon)):* b_factor {% ([pair_array, final_b_factor]) => {
+  let b_factor_array = pair_array.map(pair => pair[0]);
   b_factor_array.push(final_b_factor);
   return construct_parse_tree_node('b_term', CONJUNCTION_RULE, {b_factor_array});
 } %}
@@ -106,6 +106,9 @@ scale_operator -> ("*"|"/") {% function([[char]], location) {
   return construct_parse_tree_node('scale_operator', '("*"|"/")', {char}, location, char.length);
 } %}
 
+semicolon -> ";" {% function([char], location) {
+  return construct_parse_tree_node('semicolon', '";"', {char}, location, char.length);
+} %}
 and_symbol -> "&" {% function([char], location) {
   return construct_parse_tree_node('and_symbol', '"&"', {char}, location, char.length);
 } %}

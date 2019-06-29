@@ -15,7 +15,9 @@ var grammar = {
           return construct_parse_tree_node('statement', DISJUNCTION_RULE, {b_term_array});
         } },
     {"name": "b_term$ebnf$1", "symbols": []},
-    {"name": "b_term$ebnf$1$subexpression$1", "symbols": ["b_factor", "and_symbol"]},
+    {"name": "b_term$ebnf$1$subexpression$1$subexpression$1", "symbols": ["and_symbol"]},
+    {"name": "b_term$ebnf$1$subexpression$1$subexpression$1", "symbols": ["semicolon"]},
+    {"name": "b_term$ebnf$1$subexpression$1", "symbols": ["b_factor", "b_term$ebnf$1$subexpression$1$subexpression$1"]},
     {"name": "b_term$ebnf$1", "symbols": ["b_term$ebnf$1", "b_term$ebnf$1$subexpression$1"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "b_term", "symbols": ["b_term$ebnf$1", "b_factor"], "postprocess":  ([b_factor_and_symbol_pair_array, final_b_factor]) => {
           let b_factor_array = b_factor_and_symbol_pair_array.map(pair => pair[0]);
@@ -142,6 +144,9 @@ var grammar = {
     {"name": "scale_operator$subexpression$1", "symbols": [{"literal":"/"}]},
     {"name": "scale_operator", "symbols": ["scale_operator$subexpression$1"], "postprocess":  function([[char]], location) {
           return construct_parse_tree_node('scale_operator', '("*"|"/")', {char}, location, char.length);
+        } },
+    {"name": "semicolon", "symbols": [{"literal":";"}], "postprocess":  function([char], location) {
+          return construct_parse_tree_node('semicolon', '";"', {char}, location, char.length);
         } },
     {"name": "and_symbol", "symbols": [{"literal":"&"}], "postprocess":  function([char], location) {
           return construct_parse_tree_node('and_symbol', '"&"', {char}, location, char.length);
