@@ -564,13 +564,12 @@ function* generate_identity_match_transformations(input, node) {
         if(Object.keys(other_side_replacable_data).every(identifier => identifier in matches)) {
           let transformation_array = [];
           for(let identity_identifier in other_side_replacable_data) {
-            const replacement = matches[identity_identifier].target_node.u_variable.identifier;
             for(let replacement_datum of other_side_replacable_data[identity_identifier]) {
               const {location, num_chars} = replacement_datum.u_variable;
               transformation_array.push(
                 object_spread(
                   {location, num_chars},
-                  {replacement}
+                  {replacement: matches[identity_identifier].corresponding_string}
                 )
               );
             }
