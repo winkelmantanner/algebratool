@@ -5,8 +5,12 @@ const IDENTITIES = {
   // '2-dist': 'a*(b+c)==a*b+a*c'
   // 'distributive': 'a*(sum(term))==sum(a*term)',
   // 'substitution': '(x=a&y=f(x))==x=a&y=f(a)',
-  'Pythagorean': 'cos(x)*cos(x)+sin(x)*sin(x)==1',
-  'Tangent Cofunction': 'cot(t)==tan((3.14159/2)-t)'
+  'Pythagorean': 'cos(zxcv)*cos(zxcv)+sin(zxcv)*sin(zxcv)==1',
+  'Tangent Cofunction': 'cot(t)==tan((3.14159/2)-t)',
+  'Product To Sum': 'sin(a)*cos(b)==(1/2)*(sin(a+b)+sin(a-b))',
+  'Product To Sum': 'cos(a)*sin(b)==(1/2)*(sin(a+b)-sin(a-b))',
+  'Product To Sum': 'sin(a)*sin(b)==(1/2)*(cos(a-b)-cos(a+b))',
+  'Product To Sum': 'cos(a)*cos(b)==(1/2)*(cos(a+b)+cos(a-b))'
 };
 let computed_side_data = {};
 
@@ -32,7 +36,7 @@ function match_identity(target_node, identity_node, matches, nearest_sign_u_term
       // look for u_factor, don't pick up on function names
       let identity_u_variable = identity_node.u_variable;
       if(identity_node.u_variable.identifier in matches) {
-        if(matches[identity_u_variable.identifier].target_node.u_variable.identifier === identity_u_variable.identifier) {
+        if(matches[identity_u_variable.identifier].target_node.u_variable.identifier === target_node.u_variable.identifier) {
           matches[identity_u_variable.identifier].identity_match_position_pair_array.push({location: identity_node.location, num_chars: identity_node.num_chars});
           return true;
         }
