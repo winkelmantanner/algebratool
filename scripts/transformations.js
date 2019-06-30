@@ -17,7 +17,7 @@ function preorder_recursive(parse_tree_node, node_callback, parent_returned, del
     }
     let returned = node_callback(parse_tree_node, parent_returned);
     for(const key in parse_tree_node) {
-      preorder_recursive(parse_tree_node[key], node_callback, returned);
+      preorder_recursive(parse_tree_node[key], node_callback, returned, deleting_mark);
     }
   }
 }

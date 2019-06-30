@@ -48,7 +48,7 @@
             map_from_type_to_transformation_array[t.type].push(t);
           }
           let types = Object.keys(INSTRUCTIONS_BY_TYPE);
-          for(let key in map_from_type_to_transformation_array) {
+          for(const key in map_from_type_to_transformation_array) {
             if(types.indexOf(key) === -1) {
               types.push(key);
             }
@@ -58,7 +58,7 @@
             div.append($(get_transformation_header_html(type)));
             if(type in map_from_type_to_transformation_array) {
               for(let [transformation_index, transformation] of map_from_type_to_transformation_array[type].entries()) {
-                if(transformation.special === true) { // golden rule of algebra
+                if(transformation.special === true) {
                   if(type === GOLDEN_RULE_OF_ALGEBRA_TYPE) {
                     div.append(get_golden_rule_radio_button_and_label(input, transformation_index, transformation.equality));
                   } else if(type === SHORTEN_TYPE) {
@@ -66,7 +66,7 @@
                   } else if('message' in transformation) {
                     div.append($('<span>' + transformation.message + '</span>'));
                   }
-                } else { // not golden rule of algebra
+                } else {
                   div.append($(get_html_of_transformation(input, transformation)));
                 }
               }
