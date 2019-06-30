@@ -4,15 +4,17 @@
 const IDENTITIES = {
   'Pythagorean': 'cos(zxcv)*cos(zxcv)+sin(zxcv)*sin(zxcv)==(1)',
   'Cotangent Cofunction': 'cot(t)==tan((3.14159/2)-t)',
-  'Tangent Cofunction': 'tan(t)=cot((3.14159/2)-t)',
+  'Tangent Cofunction': 'tan(t)==cot((3.14159/2)-t)',
   'Sine Cofunction': 'sin(t)==cos((3.14159/2)-t)',
   'Cosine Cofunction': 'cos(t)=sin((3.14159/2)-t)',
   'Secant Cofunction': 'sec(t)==csc((3.14159/2)-t)',
-  'Cosecant Cofunction': 'csc(t)=sec((3.14159/2)-t)',
+  'Cosecant Cofunction': 'csc(t)==sec((3.14159/2)-t)',
   'Product To Sum (sin times cos)': 'sin(a)*cos(b)==(1/2)*(sin(a+b)+sin(a-b))',
   'Product To Sum (cos times sin)': 'cos(a)*sin(b)==(1/2)*(sin(a+b)-sin(a-b))',
   'Product To Sum (sin times sin)': 'sin(a)*sin(b)==(1/2)*(cos(a-b)-cos(a+b))',
-  'Product To Sum (cos times cos)': 'cos(a)*cos(b)==(1/2)*(cos(a+b)+cos(a-b))'
+  'Product To Sum (cos times cos)': 'cos(a)*cos(b)==(1/2)*(cos(a+b)+cos(a-b))',
+  'Multiplication of Powers': 'power(base,exp1)*power(base,exp2)==power(base,exp1+exp2)',
+  'Quadratic Formula': 'a*x*x+b*x+c=(0)==x=(-b+power(b*b-4*a*c,0.5))/(2*a)|x=(-b-power(b*b-4*a*c,0.5))/(2*a)'
   
 
 };
@@ -138,5 +140,5 @@ function get_sides_from_identity_with_given_key(identity_key) {
     });
     computed_side_data[identity_key] = {side_strings, side_objects};
   }
-  return JSON.parse(JSON.stringify(computed_side_data[identity_key]));
+  return computed_side_data[identity_key];
 }
