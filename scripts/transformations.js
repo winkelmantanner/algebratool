@@ -559,7 +559,7 @@ function* generate_identity_match_transformations(input, node) {
       let current_side_object = side_objects[side_index];
       let other_side_object = side_objects[1 - side_index];
       let matches = {};
-      if(match_identity(node, current_side_object, matches)) {
+      if(match_identity(input, node, current_side_object, matches)) {
         const other_side_replacable_data = get_all_variables_and_nearest_sign_u_term_pair(other_side_object);
         if(Object.keys(other_side_replacable_data).every(identifier => identifier in matches)) {
           let transformation_array = [];
