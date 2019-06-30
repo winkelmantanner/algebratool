@@ -14,7 +14,7 @@ const IDENTITIES = {
   'Product To Sum (sin times sin)': 'sin(a)*sin(b)==(1/2)*(cos(a-b)-cos(a+b))',
   'Product To Sum (cos times cos)': 'cos(a)*cos(b)==(1/2)*(cos(a+b)+cos(a-b))',
   'Multiplication of Powers': 'power(base,exp1)*power(base,exp2)==power(base,exp1+exp2)',
-  'Quadratic Formula': 'a*x*x+b*x+c=(0)==x=(-b+power(b*b-4*a*c,0.5))/(2*a)|x=(-b-power(b*b-4*a*c,0.5))/(2*a)'
+  'Quadratic Formula': 'a*x*x+b*x+c=0==x=(-b+power(b*b-4*a*c,0.5))/(2*a)|x=(-b-power(b*b-4*a*c,0.5))/(2*a)'
   
 
 };
@@ -26,7 +26,13 @@ function match_identity(target_node, identity_node, matches, nearest_sign_u_term
   // target_node: a node in the parse tree of the input
   // identity_node: a node in the parse tree of the identity
   // matches: {identifier in identity: {identity_match_position_pair_array: [{location, num_chars}], target_node, nearest_sign_u_term_pair_in_target}}
-  if(typeof target_node === 'object' && target_node !== null && typeof identity_node === 'object' && identity_node !== null) {
+  if(
+    typeof target_node === 'object'
+    && target_node !== null
+    && typeof identity_node === 'object'
+    && identity_node !== null
+    && target_node.type === identity_node.type
+  ) {
     if(target_node.type === 'sign_u_term_pair') {
       nearest_sign_u_term_pair_in_target = target_node;
     }
@@ -95,6 +101,7 @@ function match_identity(target_node, identity_node, matches, nearest_sign_u_term
 
 
 function get_first_significant_descendant(node) {
+  // Does not return an array, unless nested arrays are present in node
   let significant_keys = [];
   for(const key in node) {
     if(typeof node[key] === 'object' && node[key] !== null) {
@@ -134,7 +141,7 @@ function get_sides_from_identity_with_given_key(identity_key) {
       } else {
         // assume it is an equality
         parser.feed(side_string);
-        side_object = parser.results[0].statement.b_term_array[0].b_factor_array[0].equality;
+        side_object = get_first_significant_descendant(parser.results);
       }
       return side_object;
     });
