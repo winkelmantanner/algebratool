@@ -15,14 +15,14 @@ const IDENTITIES = {
   'Product To Sum (cos times cos)': 'cos(a)*cos(b)==(1/2)*(cos(a+b)+cos(a-b))',
   'Multiplication of Powers': 'power(base,exp1)*power(base,exp2)==power(base,exp1+exp2)',
   'Quadratic Formula': 'a*x*x+b*x+c=0==x=(-b+power(b*b-4*a*c,0.5))/(2*a)|x=(-b-power(b*b-4*a*c,0.5))/(2*a)'
-  
+
 
 };
 let computed_side_data = {};
 
 
 
-function match_identity(target_node, identity_node, matches, nearest_sign_u_term_pair_in_target = null) {
+function match_identity(target_string, target_node, identity_node, matches, nearest_sign_u_term_pair_in_target = null) {
   // target_node: a node in the parse tree of the input
   // identity_node: a node in the parse tree of the identity
   // matches: {identifier in identity: {identity_match_position_pair_array: [{location, num_chars}], target_node, nearest_sign_u_term_pair_in_target}}
@@ -46,17 +46,13 @@ function match_identity(target_node, identity_node, matches, nearest_sign_u_term
       return identity_node.value === target_node.value;
     } else if(
       target_node.type === 'u_factor'
-      && (
-        target_node.rule === UFACTOR_TO_UVARIABLE_RULE
-        || target_node.rule === UFACTOR_TO_UNUMBER_RULE
-      )
       && identity_node.type === 'u_factor'
       && identity_node.rule === UFACTOR_TO_UVARIABLE_RULE
     ) {
       // look for u_factor; don't pick up on function names
       let identity_u_variable = identity_node.u_variable;
       if(identity_node.u_variable.identifier in matches) {
-        if(matches[identity_u_variable.identifier].corresponding_string === get_string_of_u_factor_that_either_goes_to_u_variable_or_u_number(target_node)) {
+        if(matches[identity_u_variable.identifier].corresponding_string === get_string(target_string, target_node)) {
           matches[identity_u_variable.identifier].identity_match_position_pair_array.push({location: identity_node.location, num_chars: identity_node.num_chars});
           return true;
         }
@@ -64,7 +60,7 @@ function match_identity(target_node, identity_node, matches, nearest_sign_u_term
         matches[identity_u_variable.identifier] = {
           identity_match_position_pair_array: [{location: identity_node.location, num_chars: identity_node.num_chars}],
           target_u_factor: target_node,
-          corresponding_string: get_string_of_u_factor_that_either_goes_to_u_variable_or_u_number(target_node),
+          corresponding_string: get_string(target_string, target_node),
           nearest_sign_u_term_pair_in_target
         };
         return true;
@@ -72,7 +68,7 @@ function match_identity(target_node, identity_node, matches, nearest_sign_u_term
     } else if(Array.isArray(target_node) && Array.isArray(identity_node)){
       if(target_node.length === identity_node.length) {
         for(let k = 0; k < target_node.length; k++) {
-          if(!match_identity(target_node[k], identity_node[k], matches, nearest_sign_u_term_pair_in_target)) {
+          if(!match_identity(target_string, target_node[k], identity_node[k], matches, nearest_sign_u_term_pair_in_target)) {
             return false;
           }
         }
@@ -85,14 +81,18 @@ function match_identity(target_node, identity_node, matches, nearest_sign_u_term
         if(get_char_of_multiplied_sign_objects(identity_node.sign, target_node.sign) === '-') {
           return false;
         }
+      } else if(identity_node.type === 'operator_u_factor_pair') { // target_node.type === 'operator_u_factor_pair'
+        if(get_char_of_multiplied_operator_objects(identity_node.operator, target_node.operator) === '/') {
+          return false;
+        }
       }
       let child_keys = [];
       for(let key in target_node) {
-        if(key !== 'sign' && typeof target_node[key] === 'object' && target_node[key] !== null) {
+        if(key !== 'sign' && key !== 'operator' && typeof target_node[key] === 'object' && target_node[key] !== null) {
           child_keys.push(key);
         }
       }
-      return child_keys.every(child_key => match_identity(target_node[child_key], identity_node[child_key], matches, nearest_sign_u_term_pair_in_target))
+      return child_keys.every(child_key => match_identity(target_string, target_node[child_key], identity_node[child_key], matches, nearest_sign_u_term_pair_in_target));
     }
     return false;
   }
