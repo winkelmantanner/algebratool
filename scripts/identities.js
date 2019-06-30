@@ -2,12 +2,19 @@
 
 
 const IDENTITIES = {
-  'Pythagorean': 'cos(zxcv)*cos(zxcv)+sin(zxcv)*sin(zxcv)==1',
-  'Tangent Cofunction': 'cot(t)==tan((3.14159/2)-t)',
+  'Pythagorean': 'cos(zxcv)*cos(zxcv)+sin(zxcv)*sin(zxcv)==(1)',
+  'Cotangent Cofunction': 'cot(t)==tan((3.14159/2)-t)',
+  'Tangent Cofunction': 'tan(t)=cot((3.14159/2)-t)',
+  'Sine Cofunction': 'sin(t)==cos((3.14159/2)-t)',
+  'Cosine Cofunction': 'cos(t)=sin((3.14159/2)-t)',
+  'Secant Cofunction': 'sec(t)==csc((3.14159/2)-t)',
+  'Cosecant Cofunction': 'csc(t)=sec((3.14159/2)-t)',
   'Product To Sum (sin times cos)': 'sin(a)*cos(b)==(1/2)*(sin(a+b)+sin(a-b))',
   'Product To Sum (cos times sin)': 'cos(a)*sin(b)==(1/2)*(sin(a+b)-sin(a-b))',
   'Product To Sum (sin times sin)': 'sin(a)*sin(b)==(1/2)*(cos(a-b)-cos(a+b))',
   'Product To Sum (cos times cos)': 'cos(a)*cos(b)==(1/2)*(cos(a+b)+cos(a-b))'
+  
+
 };
 let computed_side_data = {};
 
