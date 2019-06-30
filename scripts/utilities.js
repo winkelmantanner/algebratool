@@ -547,7 +547,7 @@ function on_user_interacts(input_element) {
     input_element.value = '';
   }
   user_has_interacted = true;
-  parse('');
+  parse(input_element.value);
 }
 
 function remove_spaces_from_content(input_element) {
