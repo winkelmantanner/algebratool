@@ -10,3 +10,6 @@ c*y+x*y+b*(y-z)+a*(y-z) = 0;
 
 Rx=((+(+Ra+Rb)/(+Rs+Ra+Rb)*V12-V12)*(+1+Ra/Rb)+Rc/(+Rs+Ra+Rb)*Vs-Rc/Rb*V12)/(-Ra/Rb/Rb*V12+(+Ra/(+Rs+Ra+Rb)*Vs+V12*(+1+Ra/Rb))/Rb)
 
+
+SymPy nonlinsolve
+Rx=-(Ra*Rc*V12 + Ra*Rs*V12 + Rb*Rc*V12 - Rb*Rc*Vs + Rb*Rs*V12 + Rc*Rs*V12)/(Ra*V12 + Ra*Vs + Rb*V12 + Rs*V12)
