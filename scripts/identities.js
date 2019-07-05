@@ -158,10 +158,39 @@ function get_sides_from_identity_with_given_key(identity_key) {
 
 
 
-
-function get_static_identity_html() {
-  return get_standard_header("Identities")
-    + "<div id='identity_scrollable_div' style='height: 300px; overflow: scroll; border: 3px inset blue;'>"
+function identity_push(new_identity_key, new_identity) {
+  IDENTITIES[new_identity_key] = new_identity;
+  $('#identity_scrollable_div').empty().append(get_identities_list_content_jquery_object());
+}
+function get_identities_list_content_jquery_object() {
+  return $(
+    "<span>"
     + Object.keys(IDENTITIES).reduce((acc, identity_key) => acc + IDENTITIES[identity_key] + "<br>", '')
-    + "</div>";
+    + "</span>"
+  );
+}
+function get_identities_list_jquery_object() {
+  return $("<div id='identity_scrollable_div' style='height: 300px; overflow: scroll; border: 3px inset blue;'></div>")
+    .append(get_identities_list_content_jquery_object());
+}
+
+function get_static_identity_jquery_object() {
+  const identity_name_box = $("<input type='text' id='identity_name' /><br>");
+  const identity_lhs_box = $("<input type='text' id='identity_lhs' /><br>");
+  const identity_rhs_box = $("<input type='text' id='identity_rhs' /><br>");
+  const create_identity_button = $("<button>Create Identity</button>");
+  create_identity_button.click(function() {
+    identity_push(identity_name_box.val(), identity_lhs_box.val() + "==" + identity_rhs_box.val());
+  });
+  return $(get_standard_header("Identities"))
+    .append(
+      get_identities_list_jquery_object()
+    ).append(
+      $("<div style='border: 3px inset blue;'></div>")
+      .append("<span>Create new identity</span><br>")
+      .append("<span>Identity name:</span>").append(identity_name_box)
+      .append("<span>Left hand side:</span>").append(identity_lhs_box)
+      .append("<span>Right hand side:</span>").append(identity_rhs_box)
+      .append(create_identity_button)
+    );
 }
