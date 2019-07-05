@@ -91,6 +91,8 @@
       }
 
       function onLoad() {
+        document.getElementById('identity_container').innerHTML = get_static_identity_html();
+
         document.getElementById("input").addEventListener("input", function(event) {
             // Cancel the default action, if needed
           event.preventDefault();
@@ -148,9 +150,8 @@
       <!-- <div>
         <button id="parse_button" onClick="parse();">PARSE!!!</button>
       </div> -->
-      <div id='transformation_container' style="display: flex; flex-wrap: wrap;">
-        
-      </div>
+      <div id='transformation_container' style="display: flex; flex-wrap: wrap;"></div>
+      <div id='identity_container' class='transformation_box'>asdf</div>
       <div id="results" float="bottom"></div>
     </div>
   </body>
