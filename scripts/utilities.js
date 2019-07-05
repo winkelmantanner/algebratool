@@ -142,7 +142,7 @@ function transformation_on_click(input_id, transformation_id) {
   transformation_on_click_given_input_and_transformation(inputs_by_id[input_id], transformations_by_id[transformation_id]);
 }
 function transformation_on_click_given_input_and_transformation(input, transformation) {
-  history.push(object_spread({string_before: input}, transformation));
+  // history.push(object_spread({string_before: input}, transformation));
   document.getElementById('input').value = 
     get_text_after_transformation(input, transformation);
   history_push(input, transformation);
@@ -157,10 +157,13 @@ function toggleInfo(element, type) {
     info_element.innerHTML = '';
   }
 }
+function get_standard_header(text) {
+  return "<h5>" + text + "</h5>";
+}
 function get_transformation_header_html(type) {
   let r = Math.random();
   return "<div>"
-    + "<div style='float: left;'><h5>" + type + "</h5></div>"
+    + "<div style='float: left;'>" + get_standard_header(type) + "</div>"
     + (type in INSTRUCTIONS_BY_TYPE 
       ? "<div style='float: left;'><button data-content_id='" + String(r) + "' onClick='toggleInfo(this, \"" + type + "\")'>Info</button></div></div>"
         + "<div style='white-space: pre-wrap; float: top;' id='" + String(r) + "'></div>"

@@ -6,9 +6,15 @@ const IDENTITIES = {
   'Cotangent Cofunction': 'cot(t)==tan((3.14159/2)-t)',
   'Tangent Cofunction': 'tan(t)==cot((3.14159/2)-t)',
   'Sine Cofunction': 'sin(t)==cos((3.14159/2)-t)',
-  'Cosine Cofunction': 'cos(t)=sin((3.14159/2)-t)',
+  'Cosine Cofunction': 'cos(t)==sin((3.14159/2)-t)',
   'Secant Cofunction': 'sec(t)==csc((3.14159/2)-t)',
   'Cosecant Cofunction': 'csc(t)==sec((3.14159/2)-t)',
+  'Sine Reciprocal': 'sin(x)==1/csc(x)',
+  'Cosine Reciprocal': 'cos(x)==1/sec(x)',
+  'Tangent Reciprocal': 'tan(x)==1/cot(x)',
+  'Secant Reciprocal': 'sec(x)==1/cos(x)',
+  'Cosecant Reciprocal': 'csc(x)==1/sin(x)',
+  'Cotangent Reciprocal': 'cot(x)==1/tan(x)',
   'Product To Sum (sin times cos)': 'sin(a)*cos(b)==(1/2)*(sin(a+b)+sin(a-b))',
   'Product To Sum (cos times sin)': 'cos(a)*sin(b)==(1/2)*(sin(a+b)-sin(a-b))',
   'Product To Sum (sin times sin)': 'sin(a)*sin(b)==(1/2)*(cos(a-b)-cos(a+b))',
@@ -148,4 +154,14 @@ function get_sides_from_identity_with_given_key(identity_key) {
     computed_side_data[identity_key] = {side_strings, side_objects};
   }
   return computed_side_data[identity_key];
+}
+
+
+
+
+function get_static_identity_html() {
+  return get_standard_header("Identities")
+    + "<div id='identity_scrollable_div' style='height: 300px; overflow: scroll; border: 3px inset blue;'>"
+    + Object.keys(IDENTITIES).reduce((acc, identity_key) => acc + IDENTITIES[identity_key] + "<br>", '')
+    + "</div>";
 }
