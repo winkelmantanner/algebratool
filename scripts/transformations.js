@@ -583,7 +583,7 @@ function* generate_identity_match_transformations(input, node) {
           yield {
             special: true,
             message: "One side of the identity matched, but a button could not be generated because the other side contained a variable that the matched side did not contain, so Algebra Tool didn't know what to substitute for the variable on the other side.",
-            type: identity_key + " Identity"
+            type: identities[identity_key].name + " Identity"
           }
         }
       }

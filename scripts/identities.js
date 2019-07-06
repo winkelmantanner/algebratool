@@ -6,7 +6,6 @@ function construct_identity(name, lhs, rhs) {
 let ci = construct_identity;
 let identities = [
   ci('Pythagorean', 'cos(zxcv)*cos(zxcv)+sin(zxcv)*sin(zxcv)', '(1)'),
-  ci('Pythagorean', 'cos(zxcv)*cos(zxcv)+sin(zxcv)*sin(zxcv)', '(1)'),
   ci('Cotangent Cofunction', 'cot(t)', 'tan((3.14159/2)-t)'),
   ci('Tangent Cofunction', 'tan(t)', 'cot((3.14159/2)-t)'),
   ci('Sine Cofunction', 'sin(t)', 'cos((3.14159/2)-t)'),
@@ -164,6 +163,9 @@ function get_sides_from_identity_with_given_key(identity_key) {
 }
 
 
+function refresh_identities_menu(new_action=DEFAULT_ACTION, new_identity_key=DEFAULT_IDENTITY_KEY) {
+  $('#identity_container').empty().append(get_static_identity_jquery_object(new_action, new_identity_key));
+}
 
 function identity_set(new_identity_key, new_identity) {
   identities[new_identity_key] = new_identity;
@@ -173,13 +175,13 @@ function identity_delete(identity_key) {
   delete identities[identity_key];
 }
 
-function get_identities_list_content_jquery_object(identity_name_box, identity_lhs_box, identity_rhs_box) {
+function get_identities_list_content_jquery_object() {
   return Object.keys(identities).reduce((acc, identity_key) => acc.append(
-      $("<tr><td>" + identities[identity_key].name + " Identity</td><td>" + identities[identity_key].lhs + " = " + identities[identity_key].rhs + "</td></tr>")
+      $("<tr><td>" + identities[identity_key].name + " Identity</td><td>" + identities[identity_key].lhs + " <span style='color: blue;'>=</span> " + identities[identity_key].rhs + "</td></tr>")
       .append(
         $('<td></td>').append(
           $('<button>Edit</button>').click(function() {
-            $('#identity_container').empty().append(get_static_identity_jquery_object(EDIT_ACTION, identity_key))
+            refresh_identities_menu(EDIT_ACTION, identity_key);
           })
         )
       )
@@ -192,30 +194,43 @@ function get_identities_list_jquery_object(identity_name_box, identity_lhs_box, 
 
 const CREATE_ACTION = 'Create';
 const EDIT_ACTION = 'Edit';
+const DEFAULT_ACTION = CREATE_ACTION;
 const DEFAULT_IDENTITY_KEY = null;
-function get_static_identity_jquery_object(action=CREATE_ACTION, identity_key=DEFAULT_IDENTITY_KEY) {
+function get_static_identity_jquery_object(action=DEFAULT_ACTION, identity_key=DEFAULT_IDENTITY_KEY) {
   const identity_name_box = $("<input type='text' id='identity_name' /><span style='width: inherit; color: gray;'> Identity</span><br>");
   const identity_lhs_box = $("<input type='text' id='identity_lhs' /><br>");
   const identity_rhs_box = $("<input type='text' id='identity_rhs' /><br>");
   const button = $("<button>" + action + " Identity</button>");
+  const action_div_jquery_object = $("<div style='border: 3px inset blue;'></div>")
+    .append("<span>" + action + (action === CREATE_ACTION ? " new" : "") + " identity</span><br>")
+    .append("<span>Identity name: </span>").append(identity_name_box)
+    .append("<span>Left hand side: </span>").append(identity_lhs_box)
+    .append("<span>Right hand side: </span>").append(identity_rhs_box)
+    .append(button);
+  if(action === EDIT_ACTION) {
+    action_div_jquery_object.append($('<button>Close Editor</button>').click(
+      function() {
+        refresh_identities_menu(CREATE_ACTION);
+      }
+    ));
+  }
+  let target_identity_key = identity_key;
   if(identity_key !== DEFAULT_IDENTITY_KEY) {
     const identity = identities[identity_key];
     identity_name_box.val(identity.name);
     identity_lhs_box.val(identity.lhs);
     identity_rhs_box.val(identity.rhs);
+  } else { // identity_key === DEFAULT_IDENTITY_KEY
+    target_identity_key = Math.random();
   }
   button.click(function() {
-    identity_set(identity_key, construct_identity(identity_name_box.val(), identity_lhs_box.val(), identity_rhs_box.val()));
+    identity_set(target_identity_key, construct_identity(identity_name_box.val(), identity_lhs_box.val(), identity_rhs_box.val()));
+    refresh_identities_menu(CREATE_ACTION);
   });
   return $(get_standard_header("Identities"))
     .append(
       get_identities_list_jquery_object(identity_name_box, identity_lhs_box, identity_rhs_box)
     ).append(
-      $("<div style='border: 3px inset blue;'></div>")
-      .append("<span>" + action + (action === CREATE_ACTION ? " new" : "") + " identity</span><br>")
-      .append("<span>Identity name: </span>").append(identity_name_box)
-      .append("<span>Left hand side: </span>").append(identity_lhs_box)
-      .append("<span>Right hand side: </span>").append(identity_rhs_box)
-      .append(button)
+      action_div_jquery_object
     );
 }
