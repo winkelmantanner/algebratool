@@ -208,11 +208,18 @@ function get_static_identity_jquery_object(action=DEFAULT_ACTION, identity_key=D
     .append("<span>Right hand side: </span>").append(identity_rhs_box)
     .append(button);
   if(action === EDIT_ACTION) {
-    action_div_jquery_object.append($('<button>Close Editor</button>').click(
-      function() {
-        refresh_identities_menu(CREATE_ACTION);
-      }
-    ));
+    action_div_jquery_object
+      .append($('<button>Close Editor</button>').click(
+        function() {
+          refresh_identities_menu(CREATE_ACTION);
+        }
+      ))
+      .append($('<button>Delete Identity</button>').click(
+        function() {
+          identity_delete(identity_key);
+          refresh_identities_menu(CREATE_ACTION);
+        }
+      ));
   }
   let target_identity_key = identity_key;
   if(identity_key !== DEFAULT_IDENTITY_KEY) {
