@@ -1,29 +1,36 @@
 
 
+function construct_identity(name, lhs, rhs) {
+  return {name, lhs, rhs};
+}
+let ci = construct_identity;
+let identities = [
+  ci('Pythagorean', 'cos(zxcv)*cos(zxcv)+sin(zxcv)*sin(zxcv)', '(1)'),
+  ci('Pythagorean', 'cos(zxcv)*cos(zxcv)+sin(zxcv)*sin(zxcv)', '(1)'),
+  ci('Cotangent Cofunction', 'cot(t)', 'tan((3.14159/2)-t)'),
+  ci('Tangent Cofunction', 'tan(t)', 'cot((3.14159/2)-t)'),
+  ci('Sine Cofunction', 'sin(t)', 'cos((3.14159/2)-t)'),
+  ci('Cosine Cofunction', 'cos(t)', 'sin((3.14159/2)-t)'),
+  ci('Secant Cofunction', 'sec(t)', 'csc((3.14159/2)-t)'),
+  ci('Cosecant Cofunction', 'csc(t)', 'sec((3.14159/2)-t)'),
+  ci('Sine Reciprocal', 'sin(x)', '1/csc(x)'),
+  ci('Cosine Reciprocal', 'cos(x)', '1/sec(x)'),
+  ci('Tangent Reciprocal', 'tan(x)', '1/cot(x)'),
+  ci('Secant Reciprocal', 'sec(x)', '1/cos(x)'),
+  ci('Cosecant Reciprocal', 'csc(x)', '1/sin(x)'),
+  ci('Cotangent Reciprocal', 'cot(x)', '1/tan(x)'),
+  ci('Product To Sum (sin times cos)', 'sin(a)*cos(b)', '(1/2)*(sin(a+b)+sin(a-b))'),
+  ci('Product To Sum (cos times sin)', 'cos(a)*sin(b)', '(1/2)*(sin(a+b)-sin(a-b))'),
+  ci('Product To Sum (sin times sin)', 'sin(a)*sin(b)', '(1/2)*(cos(a-b)-cos(a+b))'),
+  ci('Product To Sum (cos times cos)', 'cos(a)*cos(b)', '(1/2)*(cos(a+b)+cos(a-b))'),
+  ci('Multiplication of Powers', 'power(base,exp1)*power(base,exp2)', 'power(base,exp1+exp2)'),
+  ci('Quadratic Formula', 'a*x*x+b*x+c=0', 'x=(-b+power(b*b-4*a*c,0.5))/(2*a)|x=(-b-power(b*b-4*a*c,0.5))/(2*a)')
 
-const IDENTITIES = {
-  'Pythagorean': 'cos(zxcv)*cos(zxcv)+sin(zxcv)*sin(zxcv)==(1)',
-  'Cotangent Cofunction': 'cot(t)==tan((3.14159/2)-t)',
-  'Tangent Cofunction': 'tan(t)==cot((3.14159/2)-t)',
-  'Sine Cofunction': 'sin(t)==cos((3.14159/2)-t)',
-  'Cosine Cofunction': 'cos(t)==sin((3.14159/2)-t)',
-  'Secant Cofunction': 'sec(t)==csc((3.14159/2)-t)',
-  'Cosecant Cofunction': 'csc(t)==sec((3.14159/2)-t)',
-  'Sine Reciprocal': 'sin(x)==1/csc(x)',
-  'Cosine Reciprocal': 'cos(x)==1/sec(x)',
-  'Tangent Reciprocal': 'tan(x)==1/cot(x)',
-  'Secant Reciprocal': 'sec(x)==1/cos(x)',
-  'Cosecant Reciprocal': 'csc(x)==1/sin(x)',
-  'Cotangent Reciprocal': 'cot(x)==1/tan(x)',
-  'Product To Sum (sin times cos)': 'sin(a)*cos(b)==(1/2)*(sin(a+b)+sin(a-b))',
-  'Product To Sum (cos times sin)': 'cos(a)*sin(b)==(1/2)*(sin(a+b)-sin(a-b))',
-  'Product To Sum (sin times sin)': 'sin(a)*sin(b)==(1/2)*(cos(a-b)-cos(a+b))',
-  'Product To Sum (cos times cos)': 'cos(a)*cos(b)==(1/2)*(cos(a+b)+cos(a-b))',
-  'Multiplication of Powers': 'power(base,exp1)*power(base,exp2)==power(base,exp1+exp2)',
-  'Quadratic Formula': 'a*x*x+b*x+c=0==x=(-b+power(b*b-4*a*c,0.5))/(2*a)|x=(-b-power(b*b-4*a*c,0.5))/(2*a)'
 
-
-};
+].reduce((acc, next_identity) => {
+  acc[Math.random()] = next_identity;
+  return acc;
+}, {});
 let computed_side_data = {};
 
 
@@ -135,8 +142,8 @@ function get_first_significant_descendant(node) {
 
 function get_sides_from_identity_with_given_key(identity_key) {
   if(!(identity_key in computed_side_data)) {
-    let identity = IDENTITIES[identity_key];
-    let side_strings = identity.split('==');
+    let identity = identities[identity_key];
+    let side_strings = [identity.lhs, identity.rhs];
     let side_objects = side_strings.map((side_string) => {
       let parser = new nearley.Parser(COMPILED_GRAMMAR);
       let side_object = null;
@@ -158,37 +165,57 @@ function get_sides_from_identity_with_given_key(identity_key) {
 
 
 
-function identity_push(new_identity_key, new_identity) {
-  IDENTITIES[new_identity_key] = new_identity;
+function identity_set(new_identity_key, new_identity) {
+  identities[new_identity_key] = new_identity;
   $('#identity_scrollable_div').empty().append(get_identities_list_content_jquery_object());
 }
-function get_identities_list_content_jquery_object() {
-  return Object.keys(IDENTITIES).reduce((acc, identity_key) => acc.append(
-      $("<tr><td>" + identity_key + " Identity<div style='float: right;'>" + IDENTITIES[identity_key] + "</div></td></tr>"),
-    ), $("<table></table>"));
-}
-function get_identities_list_jquery_object() {
-  return $("<div id='identity_scrollable_div' style='height: 300px; overflow: scroll; border: 3px inset blue;'></div>")
-    .append(get_identities_list_content_jquery_object());
+function identity_delete(identity_key) {
+  delete identities[identity_key];
 }
 
-function get_static_identity_jquery_object() {
-  const identity_name_box = $("<input type='text' id='identity_name' /><br>");
+function get_identities_list_content_jquery_object(identity_name_box, identity_lhs_box, identity_rhs_box) {
+  return Object.keys(identities).reduce((acc, identity_key) => acc.append(
+      $("<tr><td>" + identities[identity_key].name + " Identity</td><td>" + identities[identity_key].lhs + " = " + identities[identity_key].rhs + "</td></tr>")
+      .append(
+        $('<td></td>').append(
+          $('<button>Edit</button>').click(function() {
+            $('#identity_container').empty().append(get_static_identity_jquery_object(EDIT_ACTION, identity_key))
+          })
+        )
+      )
+    ), $("<table></table>"));
+}
+function get_identities_list_jquery_object(identity_name_box, identity_lhs_box, identity_rhs_box) {
+  return $("<div id='identity_scrollable_div' style='height: 300px; overflow: scroll; border: 3px inset blue;'></div>")
+    .append(get_identities_list_content_jquery_object(identity_name_box, identity_lhs_box, identity_rhs_box));
+}
+
+const CREATE_ACTION = 'Create';
+const EDIT_ACTION = 'Edit';
+const DEFAULT_IDENTITY_KEY = null;
+function get_static_identity_jquery_object(action=CREATE_ACTION, identity_key=DEFAULT_IDENTITY_KEY) {
+  const identity_name_box = $("<input type='text' id='identity_name' /><span style='width: inherit; color: gray;'> Identity</span><br>");
   const identity_lhs_box = $("<input type='text' id='identity_lhs' /><br>");
   const identity_rhs_box = $("<input type='text' id='identity_rhs' /><br>");
-  const create_identity_button = $("<button>Create Identity</button>");
-  create_identity_button.click(function() {
-    identity_push(identity_name_box.val(), identity_lhs_box.val() + "==" + identity_rhs_box.val());
+  const button = $("<button>" + action + " Identity</button>");
+  if(identity_key !== DEFAULT_IDENTITY_KEY) {
+    const identity = identities[identity_key];
+    identity_name_box.val(identity.name);
+    identity_lhs_box.val(identity.lhs);
+    identity_rhs_box.val(identity.rhs);
+  }
+  button.click(function() {
+    identity_set(identity_key, construct_identity(identity_name_box.val(), identity_lhs_box.val(), identity_rhs_box.val()));
   });
   return $(get_standard_header("Identities"))
     .append(
-      get_identities_list_jquery_object()
+      get_identities_list_jquery_object(identity_name_box, identity_lhs_box, identity_rhs_box)
     ).append(
       $("<div style='border: 3px inset blue;'></div>")
-      .append("<span>Create new identity</span><br>")
-      .append("<span>Identity name:</span>").append(identity_name_box)
-      .append("<span>Left hand side:</span>").append(identity_lhs_box)
-      .append("<span>Right hand side:</span>").append(identity_rhs_box)
-      .append(create_identity_button)
+      .append("<span>" + action + (action === CREATE_ACTION ? " new" : "") + " identity</span><br>")
+      .append("<span>Identity name: </span>").append(identity_name_box)
+      .append("<span>Left hand side: </span>").append(identity_lhs_box)
+      .append("<span>Right hand side: </span>").append(identity_rhs_box)
+      .append(button)
     );
 }

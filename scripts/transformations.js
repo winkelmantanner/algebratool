@@ -550,10 +550,9 @@ function* generate_shorten_transformations(input, node) {
 
 
 function* generate_identity_match_transformations(input, node) {
-  for(let identity_key in IDENTITIES) {
+  for(let identity_key in identities) {
     let {side_strings, side_objects} = get_sides_from_identity_with_given_key(identity_key);
     for(let side_index = 0; side_index < side_strings.length; side_index++) {
-      // identity must contain only 1 '=='
       // let current_side_string = side_strings[side_index];
       let other_side_string = side_strings[1 - side_index];
       let current_side_object = side_objects[side_index];
@@ -578,7 +577,7 @@ function* generate_identity_match_transformations(input, node) {
             location: node.location,
             num_chars: node.num_chars,
             replacement: "(" + get_text_after_multiple_transformations(other_side_string, transformation_array) + ")",
-            type: identity_key + " Identity"
+            type: identities[identity_key].name + " Identity"
           }
         } else {
           yield {
