@@ -163,11 +163,9 @@ function identity_push(new_identity_key, new_identity) {
   $('#identity_scrollable_div').empty().append(get_identities_list_content_jquery_object());
 }
 function get_identities_list_content_jquery_object() {
-  return $(
-    "<span>"
-    + Object.keys(IDENTITIES).reduce((acc, identity_key) => acc + IDENTITIES[identity_key] + "<br>", '')
-    + "</span>"
-  );
+  return Object.keys(IDENTITIES).reduce((acc, identity_key) => acc.append(
+      $("<tr><td>" + identity_key + " Identity<div style='float: right;'>" + IDENTITIES[identity_key] + "</div></td></tr>"),
+    ), $("<table></table>"));
 }
 function get_identities_list_jquery_object() {
   return $("<div id='identity_scrollable_div' style='height: 300px; overflow: scroll; border: 3px inset blue;'></div>")
