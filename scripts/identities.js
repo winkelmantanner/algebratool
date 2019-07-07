@@ -234,12 +234,18 @@ function get_static_identity_jquery_object(action=DEFAULT_ACTION, identity_key=D
     identity_set(target_identity_key, construct_identity(identity_name_box.val(), identity_lhs_box.val(), identity_rhs_box.val()));
     refresh_identities_menu(CREATE_ACTION);
   });
-  return $(get_standard_header(IDENTITIES_TYPE))
-    .append($("<div></div>")
-      .append(
+  return $("<table></table>")
+    .append(
+      $('<tr></tr>').append($('<td></td>').append(
+        $(get_transformation_header_html(IDENTITIES_TYPE))
+      ))
+    ).append(
+      $('<tr></tr>').append($('<td></td>').append(
         get_identities_list_jquery_object(identity_name_box, identity_lhs_box, identity_rhs_box)
-      ).append(
+      ))
+    ).append(
+      $('<tr></tr>').append($('<td></td>').append(
         action_div_jquery_object
-      )
+      ))
     );
 }
