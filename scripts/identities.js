@@ -162,7 +162,7 @@ function get_sides_from_identity_with_given_key(identity_key) {
 
 
 function refresh_identities_menu(new_action=DEFAULT_ACTION, new_identity_key=DEFAULT_IDENTITY_KEY) {
-  $('#identity_editor').empty().append(get_static_identity_jquery_object(new_action, new_identity_key));
+  $('#identity_editor').empty().append(get_static_identity_editor_jquery_object(new_action, new_identity_key));
 }
 
 function identity_set(new_identity_key, new_identity) {
@@ -196,7 +196,7 @@ const CREATE_ACTION = 'Create';
 const EDIT_ACTION = 'Edit';
 const DEFAULT_ACTION = CREATE_ACTION;
 const DEFAULT_IDENTITY_KEY = null;
-function get_static_identity_jquery_object(action=DEFAULT_ACTION, identity_key=DEFAULT_IDENTITY_KEY) {
+function get_static_identity_editor_jquery_object(action=DEFAULT_ACTION, identity_key=DEFAULT_IDENTITY_KEY) {
   const identity_name_box = $("<input type='text' id='identity_name' /><span style='width: inherit; color: gray;'> Identity</span><br>");
   const identity_lhs_box = $("<input type='text' id='identity_lhs' /><br>");
   const identity_rhs_box = $("<input type='text' id='identity_rhs' /><br>");
@@ -237,7 +237,7 @@ function get_static_identity_jquery_object(action=DEFAULT_ACTION, identity_key=D
   return $("<table></table>")
     .append(
       $('<tr></tr>').append($('<td></td>').append(
-        $(get_transformation_header_html(IDENTITIES_TYPE))
+        $(get_transformation_header_html("Identity Editor"))
       ))
     ).append(
       $('<tr></tr>').append($('<td></td>').append(
