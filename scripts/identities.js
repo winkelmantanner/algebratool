@@ -160,9 +160,17 @@ function get_sides_from_identity_with_given_key(identity_key) {
   return computed_side_data[identity_key];
 }
 
+function enable_identities_checkbox_onclick() {
+  refresh_identities_menu();
+  parse(document.getElementById("input").value);
+}
 
 function refresh_identities_menu(new_action=DEFAULT_ACTION, new_identity_key=DEFAULT_IDENTITY_KEY) {
-  $('#identity_editor').empty().append(get_static_identity_editor_jquery_object(new_action, new_identity_key));
+  if(document.getElementById('enable_identities_checkbox').checked) {
+    $('#identity_editor').empty().append(get_static_identity_editor_jquery_object(new_action, new_identity_key));
+  } else {
+    $('#identity_editor').empty();
+  }
 }
 
 function identity_set(new_identity_key, new_identity) {

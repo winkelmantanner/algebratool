@@ -41,7 +41,7 @@ function get_array_of_transformation(input, parse_tree_node, array_ref = []) {
       generate_reverse_distribute_matches,
       generate_substitution_replacements,
       generate_shorten_transformations,
-      generate_identity_match_transformations
+      (document.getElementById('enable_identities_checkbox').checked ? generate_identity_match_transformations : function*(){})
     ]) {
       for(let match of generator_func(input, parse_tree_node)) {
         array_ref.push(match);
