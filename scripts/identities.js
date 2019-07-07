@@ -164,7 +164,7 @@ function get_sides_from_identity_with_given_key(identity_key) {
 
 
 function refresh_identities_menu(new_action=DEFAULT_ACTION, new_identity_key=DEFAULT_IDENTITY_KEY) {
-  $('#identity_container').empty().append(get_static_identity_jquery_object(new_action, new_identity_key));
+  $('#identity_editor').empty().append(get_static_identity_jquery_object(new_action, new_identity_key));
 }
 
 function identity_set(new_identity_key, new_identity) {
@@ -200,7 +200,7 @@ function get_static_identity_jquery_object(action=DEFAULT_ACTION, identity_key=D
   const identity_name_box = $("<input type='text' id='identity_name' /><span style='width: inherit; color: gray;'> Identity</span><br>");
   const identity_lhs_box = $("<input type='text' id='identity_lhs' /><br>");
   const identity_rhs_box = $("<input type='text' id='identity_rhs' /><br>");
-  const button = $("<button>" + action + " Identity</button>");
+  const button = $("<button>" + action + "</button>");
   const action_div_jquery_object = $("<div style='border: 3px inset blue;'></div>")
     .append("<span>" + action + (action === CREATE_ACTION ? " new" : "") + " identity</span><br>")
     .append("<span>Identity name: </span>").append(identity_name_box)
@@ -234,10 +234,12 @@ function get_static_identity_jquery_object(action=DEFAULT_ACTION, identity_key=D
     identity_set(target_identity_key, construct_identity(identity_name_box.val(), identity_lhs_box.val(), identity_rhs_box.val()));
     refresh_identities_menu(CREATE_ACTION);
   });
-  return $(get_standard_header("Identities"))
-    .append(
-      get_identities_list_jquery_object(identity_name_box, identity_lhs_box, identity_rhs_box)
-    ).append(
-      action_div_jquery_object
+  return $(get_standard_header(IDENTITIES_TYPE))
+    .append($("<div></div>")
+      .append(
+        get_identities_list_jquery_object(identity_name_box, identity_lhs_box, identity_rhs_box)
+      ).append(
+        action_div_jquery_object
+      )
     );
 }

@@ -54,6 +54,8 @@
               types.push(key);
             }
           }
+          let map_from_identity_name_to_jquery_object = {};
+          $('#identity_transformation_container').empty();
           for(let type of types) {
             let div = $('<div float="left" class="transformation_box card"></div>');
             div.append($(get_transformation_header_html(type)));
@@ -64,6 +66,13 @@
                     div.append(get_golden_rule_radio_button_and_label(input, transformation_index, transformation.equality));
                   } else if(type === SHORTEN_TYPE) {
                     div.append(get_shorten_radio_button_and_label(input, transformation_index, transformation.expression));
+                  } else if(type === IDENTITIES_TYPE) {
+                    if(transformation.identity_name in map_from_identity_name_to_jquery_object) {
+                      map_from_identity_name_to_jquery_object[transformation.identity_name].append(get_html_of_transformation(input, transformation));
+                    } else {
+                      map_from_identity_name_to_jquery_object[transformation.identity_name] = $("<div>" + transformation.identity_name + get_html_of_transformation(input, transformation) + "</div>");
+                      $('#identity_transformation_container').append(map_from_identity_name_to_jquery_object[transformation.identity_name]);
+                    }
                   } else if('message' in transformation) {
                     div.append($('<span>' + transformation.message + '</span>'));
                   }
@@ -91,7 +100,7 @@
       }
 
       function onLoad() {
-        $('#identity_container').append(get_static_identity_jquery_object());
+        $('#identity_editor').append(get_static_identity_jquery_object());
 
         document.getElementById("input").addEventListener("input", function(event) {
             // Cancel the default action, if needed
@@ -151,7 +160,10 @@
         <button id="parse_button" onClick="parse();">PARSE!!!</button>
       </div> -->
       <div id='transformation_container' style="display: flex; flex-wrap: wrap;"></div>
-      <div id='identity_container' class='transformation_box'></div>
+      <div class='transformation_box'>
+        <div id='identity_editor'></div>
+        <div id='identity_transformation_container'></div>
+      </div>
       <div id="results" float="bottom"></div>
     </div>
   </body>

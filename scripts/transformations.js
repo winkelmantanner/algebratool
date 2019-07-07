@@ -548,6 +548,13 @@ function* generate_shorten_transformations(input, node) {
   }
 }
 
+INSTRUCTIONS_BY_TYPE[IDENTITIES_TYPE] = 
+  "Identities allow a lot of different rules by making rules into data rather than code.\n"
+  + "You can even make your own identities.\n"
+  + "Algebra Tool needs to see exactly what is on the identity in order to match it.\n"
+  + "An identity consists of two sides.\n"
+  + "When one side is matched, variable names will be taken from it and substituted in the other side.";
+
 
 function* generate_identity_match_transformations(input, node) {
   for(let identity_key in identities) {
@@ -574,16 +581,19 @@ function* generate_identity_match_transformations(input, node) {
             }
           }
           yield {
+            special: true,
             location: node.location,
             num_chars: node.num_chars,
             replacement: "(" + get_text_after_multiple_transformations(other_side_string, transformation_array) + ")",
-            type: identities[identity_key].name + " Identity"
+            type: IDENTITIES_TYPE,
+            identity_name: identities[identity_key].name
           }
         } else {
           yield {
             special: true,
             message: "One side of the identity matched, but a button could not be generated because the other side contained a variable that the matched side did not contain, so Algebra Tool didn't know what to substitute for the variable on the other side.",
-            type: identities[identity_key].name + " Identity"
+            type: IDENTITIES_TYPE,
+            identity_name: identities[identity_key].name
           }
         }
       }
