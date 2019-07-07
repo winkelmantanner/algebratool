@@ -553,7 +553,9 @@ INSTRUCTIONS_BY_TYPE[IDENTITIES_TYPE] =
   + "You can even make your own identities.\n"
   + "Algebra Tool needs to see exactly what is on the identity in order to match it.\n"
   + "An identity consists of two sides.\n"
-  + "When one side is matched, variable names will be taken from it and substituted in the other side.";
+  + "When one side is matched, variable names will be taken from it and substituted in the other side.\n"
+  + "If you make changes to the identity set, they will be saved as cookies in your web browser.\n"
+  + "You must make sure that the identities you make are correct.";
 
 
 function* generate_identity_match_transformations(input, node) {

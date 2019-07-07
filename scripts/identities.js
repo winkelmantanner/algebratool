@@ -5,13 +5,8 @@ function construct_identity(name, lhs, rhs) {
 }
 let ci = construct_identity;
 let identities = [
+  ci('Quadratic Formula', 'a*x*x+b*x+c=0', 'x=(-b+power(b*b-4*a*c,0.5))/(2*a)|x=(-b-power(b*b-4*a*c,0.5))/(2*a)'),
   ci('Pythagorean', 'cos(zxcv)*cos(zxcv)+sin(zxcv)*sin(zxcv)', '(1)'),
-  ci('Cotangent Cofunction', 'cot(t)', 'tan((3.14159/2)-t)'),
-  ci('Tangent Cofunction', 'tan(t)', 'cot((3.14159/2)-t)'),
-  ci('Sine Cofunction', 'sin(t)', 'cos((3.14159/2)-t)'),
-  ci('Cosine Cofunction', 'cos(t)', 'sin((3.14159/2)-t)'),
-  ci('Secant Cofunction', 'sec(t)', 'csc((3.14159/2)-t)'),
-  ci('Cosecant Cofunction', 'csc(t)', 'sec((3.14159/2)-t)'),
   ci('Sine Reciprocal', 'sin(x)', '1/csc(x)'),
   ci('Cosine Reciprocal', 'cos(x)', '1/sec(x)'),
   ci('Tangent Reciprocal', 'tan(x)', '1/cot(x)'),
@@ -22,14 +17,17 @@ let identities = [
   ci('Product To Sum (cos times sin)', 'cos(a)*sin(b)', '(1/2)*(sin(a+b)-sin(a-b))'),
   ci('Product To Sum (sin times sin)', 'sin(a)*sin(b)', '(1/2)*(cos(a-b)-cos(a+b))'),
   ci('Product To Sum (cos times cos)', 'cos(a)*cos(b)', '(1/2)*(cos(a+b)+cos(a-b))'),
-  ci('Multiplication of Powers', 'power(base,exp1)*power(base,exp2)', 'power(base,exp1+exp2)'),
-  ci('Quadratic Formula', 'a*x*x+b*x+c=0', 'x=(-b+power(b*b-4*a*c,0.5))/(2*a)|x=(-b-power(b*b-4*a*c,0.5))/(2*a)')
+  ci('Multiplication of Powers', 'power(base,exp1)*power(base,exp2)', 'power(base,exp1+exp2)')
 
 
 ].reduce((acc, next_identity) => {
   acc[Math.random()] = next_identity;
   return acc;
 }, {});
+if(my_get_cookie('identities') !== undefined) {
+  identities = my_get_cookie('identities');
+}
+
 let computed_side_data = {};
 
 
@@ -170,9 +168,11 @@ function refresh_identities_menu(new_action=DEFAULT_ACTION, new_identity_key=DEF
 function identity_set(new_identity_key, new_identity) {
   identities[new_identity_key] = new_identity;
   $('#identity_scrollable_div').empty().append(get_identities_list_content_jquery_object());
+  my_set_cookie('identities', identities);
 }
 function identity_delete(identity_key) {
   delete identities[identity_key];
+  my_set_cookie('identities', identities);
 }
 
 function get_identities_list_content_jquery_object() {

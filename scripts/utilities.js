@@ -575,3 +575,21 @@ function get_string_of_u_factor_that_either_goes_to_u_variable_or_u_number(
   return string;
 }
 
+function my_set_cookie(key, value) {
+  // key: string
+  // value: serializable with JSON
+  // serializes with JSON
+  Cookies.set(key, JSON.stringify(value), { expires: 5555 /* days (forever) */ });
+}
+function my_get_cookie(key) {
+  // key: string
+  // returns undefined if cookies is not present
+  // deserializes value with JSON
+  const val = Cookies.get(key);
+  if(val === undefined) {
+    return undefined;
+  } else {
+    return JSON.parse(Cookies.get(key));
+  }
+}
+
