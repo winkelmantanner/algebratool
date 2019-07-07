@@ -550,12 +550,11 @@ function* generate_shorten_transformations(input, node) {
 
 INSTRUCTIONS_BY_TYPE[IDENTITIES_TYPE] = 
   "Identities allow a lot of different rules by making rules into data rather than code.\n"
-  + "You can even make your own identities.\n"
-  + "Algebra Tool needs to see exactly what is on the identity in order to match it.\n"
+  + "Unfortunately, identities don't work very well, so they are disabled by default.\n"
+  + "You can make your own identities.\n"
   + "An identity consists of two sides.\n"
   + "When one side is matched, variable names will be taken from it and substituted in the other side.\n"
-  + "If you make changes to the identity set, they will be saved as cookies in your web browser.\n"
-  + "You must make sure that the identities you make are correct.";
+  + "If you make changes to the identity set, they will be saved as cookies in your web browser.";
 
 
 function* generate_identity_match_transformations(input, node) {
