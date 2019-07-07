@@ -55,6 +55,9 @@
               types.push(key);
             }
           }
+          if(!document.getElementById('enable_identities_checkbox').checked) {
+            types = types.filter(type => type !== IDENTITIES_TYPE);
+          }
           let map_from_identity_name_to_jquery_object = {};
           for(let type of types) {
             let div = $('<div float="left" class="transformation_box card"></div>');
@@ -100,7 +103,8 @@
       }
 
       function onLoad() {
-        $('#identity_editor').append(get_static_identity_editor_jquery_object());
+        // $('#identity_editor').append(get_static_identity_editor_jquery_object());
+        $('#enable_identities_checkbox').click(enable_identities_checkbox_onclick);
 
         document.getElementById("input").addEventListener("input", function(event) {
             // Cancel the default action, if needed
@@ -160,9 +164,12 @@
         <button id="parse_button" onClick="parse();">PARSE!!!</button>
       </div> -->
       <div id='transformation_container' style="display: flex; flex-wrap: wrap;"></div>
-      <div class='transformation_box card'>
+
+      <div style='width: inherited;' class='transformation_box card'>
+        <div class='row-xs'><input type='checkbox' id='enable_identities_checkbox' name='Enable Identities' /><label for='Enable Identities'>Enable Identities</label></div>
         <div id='identity_editor'></div>
       </div>
+
       <div id="results" float="bottom"></div>
     </div>
   </body>
