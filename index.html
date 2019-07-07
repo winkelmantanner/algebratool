@@ -56,7 +56,6 @@
             }
           }
           let map_from_identity_name_to_jquery_object = {};
-          $('#identity_transformation_container').empty();
           for(let type of types) {
             let div = $('<div float="left" class="transformation_box card"></div>');
             div.append($(get_transformation_header_html(type)));
@@ -71,8 +70,8 @@
                     if(transformation.identity_name in map_from_identity_name_to_jquery_object) {
                       map_from_identity_name_to_jquery_object[transformation.identity_name].append(get_html_of_transformation(input, transformation));
                     } else {
-                      map_from_identity_name_to_jquery_object[transformation.identity_name] = $("<div>" + transformation.identity_name + get_html_of_transformation(input, transformation) + "</div>");
-                      $('#identity_transformation_container').append(map_from_identity_name_to_jquery_object[transformation.identity_name]);
+                      map_from_identity_name_to_jquery_object[transformation.identity_name] = $("<div>" + transformation.identity_name + " Identity<br />" + get_html_of_transformation(input, transformation) + "</div>");
+                      div.append(map_from_identity_name_to_jquery_object[transformation.identity_name]);
                     }
                   } else if('message' in transformation) {
                     div.append($('<span>' + transformation.message + '</span>'));
@@ -101,7 +100,7 @@
       }
 
       function onLoad() {
-        $('#identity_editor').append(get_static_identity_jquery_object());
+        $('#identity_editor').append(get_static_identity_editor_jquery_object());
 
         document.getElementById("input").addEventListener("input", function(event) {
             // Cancel the default action, if needed
@@ -163,7 +162,6 @@
       <div id='transformation_container' style="display: flex; flex-wrap: wrap;"></div>
       <div class='transformation_box card'>
         <div id='identity_editor'></div>
-        <div id='identity_transformation_container'></div>
       </div>
       <div id="results" float="bottom"></div>
     </div>
