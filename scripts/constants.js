@@ -32,7 +32,7 @@ const SHORTEN_TYPE = 'Shorten';
 const REMOVE_PARENTHESIS_TYPE = 'Remove Parenthesis';
 const SUBSTITUTE_TYPE = 'Substitute';
 const MANUAL_CHANGE_TYPE = 'Manual Change';
-
+const IDENTITIES_TYPE = 'Identities';
 
 
 
