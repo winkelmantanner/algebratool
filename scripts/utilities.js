@@ -302,6 +302,13 @@ function get_shorten_radio_button_and_label(input, value, expression) {
   ));
 }
 
+function multislice(string, location_pair_array) {
+  // location_pair_array is an array of slice-style location pairs
+  return location_pair_array.reduce((acc, next_pair) => {
+    return acc + string.slice(...next_pair);
+  }, "");
+}
+
 
 function get_golden_rule_action_div(input, equality) {
   if(equality.rule !== EQUALITY_RULE) {
@@ -326,18 +333,64 @@ function get_golden_rule_action_div(input, equality) {
 
       // operator and expression inputs are valid
       let replacement = '';
+      let open_paren_location_pair_array = []; // location in replacement
       for(let index = 0; index < equality.expression_array.length; index++) {
-        if(index >= 1)  {
+        if(index >= 1) {
           replacement += '=';
         }
-        replacement += "(" + get_string(input, equality.expression_array[index]) + ")" + operator + "(" + expression + ")";
+        let open_paren_location_pair = {}; // gives the location in the result of the opening parentheses, so that they may be removed if possible
+        open_paren_location_pair.side_loc = replacement.length;
+        replacement += "(" + get_string(input, equality.expression_array[index]);
+        open_paren_location_pair.side_end_loc = replacement.length;
+        replacement += ")" + operator;
+        open_paren_location_pair.expression_loc = replacement.length;
+        replacement += "(" + expression;
+        open_paren_location_pair.expression_end_loc = replacement.length;
+        replacement += ")";
+        open_paren_location_pair_array.push(open_paren_location_pair);
       }
-      button_div.html(get_button_html_of_transformation(input, {
+
+      const transformation_with_no_parens_removed = {
         location: equality.location,
         num_chars: equality.num_chars,
         replacement,
         type: GOLDEN_RULE_OF_ALGEBRA_TYPE
-      }));
+      };
+      const result_with_no_parens_removed = get_text_after_transformation(input, transformation_with_no_parens_removed);
+
+      let paren_removal_parser = new nearley.Parser(COMPILED_GRAMMAR);
+      paren_removal_parser.feed(result_with_no_parens_removed);
+      let paren_removal_transformations = []; // to be applied to replacement
+      traverse_parse_tree_preorder(paren_removal_parser.results, (node, parent_returned) => {
+        if(node.type === 'u_factor' && node.rule === UFACTOR_TO_PARENTHESISTED_EXPRESSION_RULE) {
+          if(open_paren_location_pair_array.some(pair => pair.side_loc === node.location - equality.location || pair.expression_loc === node.location - equality.location)) {
+            let found = false;
+            for(let transf_inner of generate_sign_distribute_matches(result_with_no_parens_removed, parent_returned)) {
+              if(get_text_after_transformation(result_with_no_parens_removed, transf_inner) === multislice(result_with_no_parens_removed, [[0, node.location], [node.location + 1, node.location + node.num_chars - 1], [node.location + node.num_chars]])) {
+                found = true;
+              }
+            }
+            if(found) {
+              paren_removal_transformations.push({
+                location: node.location - equality.location,
+                num_chars: node.num_chars,
+                replacement: replacement.slice(node.location - equality.location + 1, node.location - equality.location + node.num_chars - 1)
+              })
+            }
+          }
+        } else if(node.type === 'sign_u_term_pair') {
+          return node;
+        }
+        return parent_returned;
+      });
+      // console.log(paren_removal_transformations);
+
+
+
+      button_div.html(get_button_html_of_transformation(input, object_spread(
+        transformation_with_no_parens_removed,
+        {replacement: get_text_after_multiple_transformations(replacement, paren_removal_transformations)}
+      )));
     } catch(e) {
       button_div.html('');
     }

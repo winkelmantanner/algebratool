@@ -190,6 +190,7 @@ INSTRUCTIONS_BY_TYPE[DISTRIBUTE_SIGN_TYPE] =
 
 function* generate_sign_distribute_matches(input, node) {
   // order free
+  // This function actually generates correct transformations
   const node_string = get_string(input, node);
   if(typeof node === 'object'
     && node.type === 'sign_u_term_pair'
