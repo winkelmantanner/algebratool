@@ -309,6 +309,27 @@ function multislice(string, location_pair_array) {
   }, "");
 }
 
+function get_transformation_to_remove_parens(string_with_parens, nearest_sign_u_term_pair, u_factor_that_goes_to_parenthesised_expression) {
+  // returns a transformation if the parens can be deleted from the string
+  // otherwise returns null
+  let found = false;
+  const node = u_factor_that_goes_to_parenthesised_expression; // just cause that variable name is so long
+  for(let transf_inner of generate_sign_distribute_matches(string_with_parens, nearest_sign_u_term_pair)) {
+    if(get_text_after_transformation(string_with_parens, transf_inner) === multislice(string_with_parens, [[0, node.location], [node.location + 1, node.location + node.num_chars - 1], [node.location + node.num_chars]])) {
+      found = true;
+    }
+  }
+  if(found) {
+    return {
+      location: node.location,
+      num_chars: node.num_chars,
+      replacement: string_with_parens.slice(node.location + 1, node.location + node.num_chars - 1)
+    };
+  } else {
+    return null;
+  }
+}
+
 
 function get_golden_rule_action_div(input, equality) {
   if(equality.rule !== EQUALITY_RULE) {
@@ -333,21 +354,27 @@ function get_golden_rule_action_div(input, equality) {
 
       // operator and expression inputs are valid
       let replacement = '';
-      let open_paren_location_pair_array = []; // location in replacement
+      let paren_location_pair_array = []; // location in replacement
       for(let index = 0; index < equality.expression_array.length; index++) {
         if(index >= 1) {
           replacement += '=';
         }
-        let open_paren_location_pair = {}; // gives the location in the result of the opening parentheses, so that they may be removed if possible
-        open_paren_location_pair.side_loc = replacement.length;
+
+        let paren_location_pair = Array(2);
+        paren_location_pair[0] = replacement.length;
         replacement += "(" + get_string(input, equality.expression_array[index]);
-        open_paren_location_pair.side_end_loc = replacement.length;
+        paren_location_pair[1] = replacement.length;
         replacement += ")" + operator;
-        open_paren_location_pair.expression_loc = replacement.length;
+
+        paren_location_pair_array.push(paren_location_pair);
+
+        paren_location_pair = Array(2);
+        paren_location_pair[0] = replacement.length;
         replacement += "(" + expression;
-        open_paren_location_pair.expression_end_loc = replacement.length;
+        paren_location_pair[1] = replacement.length;
         replacement += ")";
-        open_paren_location_pair_array.push(open_paren_location_pair);
+
+        paren_location_pair_array.push(paren_location_pair);
       }
 
       const transformation_with_no_parens_removed = {
@@ -360,22 +387,13 @@ function get_golden_rule_action_div(input, equality) {
 
       let paren_removal_parser = new nearley.Parser(COMPILED_GRAMMAR);
       paren_removal_parser.feed(result_with_no_parens_removed);
-      let paren_removal_transformations = []; // to be applied to replacement
+      let paren_removal_transformations = []; // the location for these is configured for result_with_no_parens_removed, but they are mapped through the shift of the location to apply them to replacement
       traverse_parse_tree_preorder(paren_removal_parser.results, (node, parent_returned) => {
         if(node.type === 'u_factor' && node.rule === UFACTOR_TO_PARENTHESISTED_EXPRESSION_RULE) {
-          if(open_paren_location_pair_array.some(pair => pair.side_loc === node.location - equality.location || pair.expression_loc === node.location - equality.location)) {
-            let found = false;
-            for(let transf_inner of generate_sign_distribute_matches(result_with_no_parens_removed, parent_returned)) {
-              if(get_text_after_transformation(result_with_no_parens_removed, transf_inner) === multislice(result_with_no_parens_removed, [[0, node.location], [node.location + 1, node.location + node.num_chars - 1], [node.location + node.num_chars]])) {
-                found = true;
-              }
-            }
-            if(found) {
-              paren_removal_transformations.push({
-                location: node.location - equality.location,
-                num_chars: node.num_chars,
-                replacement: replacement.slice(node.location - equality.location + 1, node.location - equality.location + node.num_chars - 1)
-              })
+          if(paren_location_pair_array.some(pair => pair[0] === node.location - equality.location)) {
+            let transformation_to_remove_parens_if_applicable = get_transformation_to_remove_parens(result_with_no_parens_removed, parent_returned, node);
+            if(transformation_to_remove_parens_if_applicable !== null) {
+              paren_removal_transformations.push(transformation_to_remove_parens_if_applicable);
             }
           }
         } else if(node.type === 'sign_u_term_pair') {
@@ -389,7 +407,11 @@ function get_golden_rule_action_div(input, equality) {
 
       button_div.html(get_button_html_of_transformation(input, object_spread(
         transformation_with_no_parens_removed,
-        {replacement: get_text_after_multiple_transformations(replacement, paren_removal_transformations)}
+        {replacement: get_text_after_multiple_transformations(
+          replacement,
+          paren_removal_transformations.map(
+            transf => object_spread(transf, {location: transf.location - equality.location})
+          ))}
       )));
     } catch(e) {
       button_div.html('');
@@ -529,6 +551,7 @@ function hash_node(node) {
   // not a secure hash:
   // this function will be used to determine if nodes are equivalent by order change
   // and make nodes comparable
+  // DON'T RELY ON THIS WORKING
   if(node !== null && node !== undefined) {
     if(node.type in SPECIAL_HASH_TECHNIQUES) {
       return SPECIAL_HASH_TECHNIQUES[node.type](node);
