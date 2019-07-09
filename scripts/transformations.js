@@ -414,7 +414,7 @@ function* generate_one_removal_matches(input, node) {
 INSTRUCTIONS_BY_TYPE[GOLDEN_RULE_OF_ALGEBRA_TYPE] = 
   "Any mathematical operation can be performed on one side of an equation so long as the identical operation is performed on the other side of the equation. <a href='http://hyperphysics.phy-astr.gsu.edu/hbase/alg2.html#ag'>[source]</a>\n"
   + "Select an equation. Then, use the Operator box to specify the operation.  Use the Expression box to specify the right operand.\n"
-  + "Algebra Tool wraps the previous expression and the right operand in parentheses.  So whenever you use the Golden Rule of Algebra, you will need to use Remove Parentheses and Distribute Sign afterward.\n"
+  + "Algebra Tool wraps the previous expression and the right operand in parentheses only if necessary.\n"
   + "<strong>Warning:</strong>If you divide by something, make sure that it is not 0.  Algebra tool cannot check that for you.";
 
 function* generate_golden_rule_matches(input, node) {
@@ -510,14 +510,27 @@ function* generate_substitution_replacements(input, node) {
               && target_b_factor.rule === BFACTOR_TO_EQUALITY_RULE
               && get_string(input, target_b_factor.equality).search(new RegExp(pair.identifier, 'g')) >= 0
             ) {
-              let equality = target_b_factor.equality;
-              yield {
-                location: equality.location,
-                num_chars: equality.num_chars,
-                replacement: get_string(input, equality).replace(
-                  new RegExp(pair.identifier, 'g'),
-                  "(" + get_string(input, pair.expression) + ")"),
-                type: SUBSTITUTE_TYPE
+              let location_array = [];
+              traverse_parse_tree_preorder(target_b_factor, (node) => {
+                if(node.type === 'u_factor' && node.rule === UFACTOR_TO_UVARIABLE_RULE && node.u_variable.identifier === pair.identifier) {
+                  location_array.push(node.location);
+                }
+              });
+              if(location_array.length > 0) {
+                const equality = target_b_factor.equality;
+                const replacement = get_text_after_multiple_transformations(
+                  get_string(input, equality),
+                  location_array.map(location_in_input => {return {
+                    location: location_in_input - equality.location,
+                    num_chars: pair.identifier.length,
+                    replacement: "(" + get_string(input, pair.expression) + ")"
+                  };}));
+                yield {
+                  location: equality.location,
+                  num_chars: equality.num_chars,
+                  replacement,
+                  type: SUBSTITUTE_TYPE
+                }
               }
             }
           }
