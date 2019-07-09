@@ -312,6 +312,9 @@ function multislice(string, location_pair_array) {
 function get_transformation_to_remove_parens(string_with_parens, nearest_sign_u_term_pair, u_factor_that_goes_to_parenthesised_expression) {
   // returns a transformation if the parens can be deleted from the string
   // otherwise returns null
+  if(u_factor_that_goes_to_parenthesised_expression.type !== 'u_factor') {
+    throw 'get_transformation_to_remove_parens was passed a u_factor_that_goes_to_parenthesised_expression that was not a u_factor';
+  }
   let found = false;
   const node = u_factor_that_goes_to_parenthesised_expression; // just cause that variable name is so long
   for(let transf_inner of generate_sign_distribute_matches(string_with_parens, nearest_sign_u_term_pair)) {
@@ -328,6 +331,55 @@ function get_transformation_to_remove_parens(string_with_parens, nearest_sign_u_
   } else {
     return null;
   }
+}
+
+function get_golden_rule_transformation(input, equality_node, operator_string, expression_string) {
+  let replacement = '';
+  let open_paren_location_array = []; // location in replacement
+  for(let index = 0; index < equality_node.expression_array.length; index++) {
+    if(index >= 1) {
+      replacement += '=';
+    }
+
+    open_paren_location_array.push(replacement.length);
+    replacement += "(" + get_string(input, equality_node.expression_array[index]) + ")" + operator_string;
+
+    open_paren_location_array.push(replacement.length);
+    replacement += "(" + expression_string + ")";
+  }
+
+  const transformation_with_no_parens_removed = {
+    location: equality_node.location,
+    num_chars: equality_node.num_chars,
+    replacement,
+    type: GOLDEN_RULE_OF_ALGEBRA_TYPE
+  };
+  const result_with_no_parens_removed = get_text_after_transformation(input, transformation_with_no_parens_removed);
+
+  let paren_removal_parser = new nearley.Parser(COMPILED_GRAMMAR);
+  paren_removal_parser.feed(result_with_no_parens_removed);
+  let paren_removal_transformations = []; // the location for these is configured for result_with_no_parens_removed, but they are mapped through the shift of the location to apply them to replacement
+  traverse_parse_tree_preorder(paren_removal_parser.results, (node, parent_returned) => {
+    if(node.type === 'u_factor' && node.rule === UFACTOR_TO_PARENTHESISTED_EXPRESSION_RULE) {
+      if(open_paren_location_array.some(loc => loc === node.location - equality_node.location)) {
+        let transformation_to_remove_parens_if_applicable = get_transformation_to_remove_parens(result_with_no_parens_removed, parent_returned, node);
+        if(transformation_to_remove_parens_if_applicable !== null) {
+          paren_removal_transformations.push(transformation_to_remove_parens_if_applicable);
+        }
+      }
+    } else if(node.type === 'sign_u_term_pair') {
+      return node;
+    }
+    return parent_returned;
+  });
+  return object_spread(
+    transformation_with_no_parens_removed,
+    {replacement: get_text_after_multiple_transformations(
+      replacement,
+      paren_removal_transformations.map(
+        transf => object_spread(transf, {location: transf.location - equality_node.location})
+      ))}
+  );
 }
 
 
@@ -353,66 +405,7 @@ function get_golden_rule_action_div(input, equality) {
       }
 
       // operator and expression inputs are valid
-      let replacement = '';
-      let paren_location_pair_array = []; // location in replacement
-      for(let index = 0; index < equality.expression_array.length; index++) {
-        if(index >= 1) {
-          replacement += '=';
-        }
-
-        let paren_location_pair = Array(2);
-        paren_location_pair[0] = replacement.length;
-        replacement += "(" + get_string(input, equality.expression_array[index]);
-        paren_location_pair[1] = replacement.length;
-        replacement += ")" + operator;
-
-        paren_location_pair_array.push(paren_location_pair);
-
-        paren_location_pair = Array(2);
-        paren_location_pair[0] = replacement.length;
-        replacement += "(" + expression;
-        paren_location_pair[1] = replacement.length;
-        replacement += ")";
-
-        paren_location_pair_array.push(paren_location_pair);
-      }
-
-      const transformation_with_no_parens_removed = {
-        location: equality.location,
-        num_chars: equality.num_chars,
-        replacement,
-        type: GOLDEN_RULE_OF_ALGEBRA_TYPE
-      };
-      const result_with_no_parens_removed = get_text_after_transformation(input, transformation_with_no_parens_removed);
-
-      let paren_removal_parser = new nearley.Parser(COMPILED_GRAMMAR);
-      paren_removal_parser.feed(result_with_no_parens_removed);
-      let paren_removal_transformations = []; // the location for these is configured for result_with_no_parens_removed, but they are mapped through the shift of the location to apply them to replacement
-      traverse_parse_tree_preorder(paren_removal_parser.results, (node, parent_returned) => {
-        if(node.type === 'u_factor' && node.rule === UFACTOR_TO_PARENTHESISTED_EXPRESSION_RULE) {
-          if(paren_location_pair_array.some(pair => pair[0] === node.location - equality.location)) {
-            let transformation_to_remove_parens_if_applicable = get_transformation_to_remove_parens(result_with_no_parens_removed, parent_returned, node);
-            if(transformation_to_remove_parens_if_applicable !== null) {
-              paren_removal_transformations.push(transformation_to_remove_parens_if_applicable);
-            }
-          }
-        } else if(node.type === 'sign_u_term_pair') {
-          return node;
-        }
-        return parent_returned;
-      });
-      // console.log(paren_removal_transformations);
-
-
-
-      button_div.html(get_button_html_of_transformation(input, object_spread(
-        transformation_with_no_parens_removed,
-        {replacement: get_text_after_multiple_transformations(
-          replacement,
-          paren_removal_transformations.map(
-            transf => object_spread(transf, {location: transf.location - equality.location})
-          ))}
-      )));
+      button_div.html(get_button_html_of_transformation(input, get_golden_rule_transformation(input, equality, operator, expression)));
     } catch(e) {
       button_div.html('');
     }
