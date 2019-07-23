@@ -25,7 +25,7 @@ function determine_location(parse_tree_node, already_processed=[]) {
       return parse_tree_node.location;
     } else {
       if(parse_tree_node in already_processed) {
-        return null;
+        throw "recursive parse tree!";
       }
       already_processed.push(parse_tree_node);
       let min_location = Infinity;
@@ -66,9 +66,6 @@ function determine_num_chars(parse_tree_node, already_processed=[]) {
         }
       }
     }
-  }
-  if(num_chars === null || typeof num_chars === 'string') {
-    throw 'ERROR';
   }
   return num_chars;
 }
