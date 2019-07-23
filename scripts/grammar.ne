@@ -82,6 +82,15 @@ u_factor -> u_variable {% function([u_variable]) {
 u_factor -> u_number {% function([u_number]) {
   return construct_parse_tree_node('u_factor', UFACTOR_TO_UNUMBER_RULE, {u_number});
 } %}
+
+# All rules above this comment may not have terminals on the RHS.
+# All rules below this comment may not have nonterminals on the RHS.
+# The return value of all postprocessor functions below this
+#   comment must have the location and num_chars attributes.
+#
+# Those three requirements are necessary to accurately get the
+#   location and num_chars of parse tree nodes.
+
 u_number -> [0-9]:+ ("." [0-9]:+):? ("e" ("+"|"-"):? [0-9]:+):? {% function([digits, optional_decimal, optional_e], location) {
   const full_string = join(digits) + (optional_decimal !== null ? optional_decimal[0] + join(optional_decimal[1]) : '') + (optional_e !== null ? optional_e[0] + (optional_e[1] || "") + join(optional_e[2]) : "");
   return construct_parse_tree_node('u_number', '[0-9]:+', {value: Number(full_string)}, location, full_string.length);
