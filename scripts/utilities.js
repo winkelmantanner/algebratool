@@ -7,6 +7,8 @@ const HISTORY_ENTRY_DIV_PREFIX = 'history_entry_div_';
 
 
 function object_spread(object1, object2) {
+  // This replaces the {object1, ...object2} syntax which is in new JavaScript.
+  // By using this function instead of {object1, ...object2}, Algebra Tool works on more browsers.
   // object2 overrides object1
   let result = {};
   for(let key in object1) {
@@ -95,6 +97,7 @@ function join(char_array) {
   return char_array.join('');
 }
 
+// Next are some helpful functions for transformations.
 function get_text_after_transformation(input, transformation) {
   return input.slice(0, transformation.location) + transformation.replacement + input.slice(transformation.location + transformation.num_chars);
 }
@@ -124,6 +127,9 @@ function get_text_after_multiple_transformations(input, transformation_array) {
   return result;
 }
 
+// Next is a bunch of functions that manipulate strings of HTML.
+// I started using jQuery after I had already written this code.
+// jQuery is better, mainly because jQuery solves the problem that caused me to use the following global variables.
 let transformations_by_id = {};
 let current_transformation_id = 0;
 let inputs_by_id = {};
@@ -202,7 +208,12 @@ function get_html_of_transformation(input, transformation) {
     + get_button_html_of_transformation(input, transformation)
     + "</td></tr>";
 }
+
+
+// The next few helper functions multiply signs and operators.
 function get_char_of_multiplied_sign_objects(sign_object_1, sign_object_2) {
+  // Precondition: both parameters must be either null or a parse tree node of the sign type.
+  // Returns null iff both parameters are null.  Otherwise returns a string of length 1.
   if(sign_object_1 === null && sign_object_2 === null) return null;
   if(sign_object_1 === null) return sign_object_2.char;
   if(sign_object_2 === null) return sign_object_1.char;
@@ -217,6 +228,8 @@ function get_char_of_multiplied_sign_chars(sign_char_1, sign_char_2) {
   }[sign_char_1 + sign_char_2];
 }
 function get_char_of_multiplied_operator_objects(operator_object_1, operator_object_2) {
+  // Precondition: both parameters must be either null or a parse tree node of the operator type.
+  // Returns null iff both parameters are null.  Otherwise returns a string of length 1.
   if(operator_object_1 === null && operator_object_2 === null) return null;
   if(operator_object_1 === null) return operator_object_2.char;
   if(operator_object_2 === null) return operator_object_1.char;
@@ -227,14 +240,19 @@ function get_char_of_multiplied_operator_objects(operator_object_1, operator_obj
     '//': '*'
   }[operator_object_1.char + operator_object_2.char];
 }
+
 function get_string(input, parse_tree_node) {
+  // Every node in a parse tree corresponds to a substring of the parsed string.
+  // Given the original string and a parse tree node,
+  //   this function returns the string corresponding to the passed parse tree node.
+  // input: string.  This must be the string from which the parse tree was generated.
+  // parse_tree_node: object.  This is a node in the parse tree of input.  Should have been constructed with construct_parse_tree_node.
   return input.slice(parse_tree_node.location, parse_tree_node.location + parse_tree_node.num_chars);
 }
 
 function* generate_identifiers_expression_pairs_for_which_the_equality_is_solved(equality_object) {
-  /*
-    yields {identifier: string, expression: object} pairs
-  */
+  // Used by substitute transformation generator
+  // yields {identifier: string, expression: object} pairs
   if(equality_object.type === 'equality') {
     if(equality_object.rule === EQUALITY_RULE) {
       for(let expression of equality_object.expression_array) {
@@ -492,6 +510,9 @@ function remove_spaces_from_content(input_element) {
 }
 
 
+// Don't assume any functions below actually get called anywhere
+
+
 function hash_array(array, delimiter = '') {
   let hashes = array.map(hash_node);
   hashes.sort();
@@ -539,7 +560,7 @@ let SPECIAL_HASH_TECHNIQUES = {
 };
 function hash_node(node) {
   // not a secure hash:
-  // this function will be used to determine if nodes are equivalent by order change
+  // this function was intended to be used to determine if nodes are equivalent by order change
   // and make nodes comparable
   // DON'T RELY ON THIS WORKING
   if(node !== null && node !== undefined) {
@@ -608,6 +629,7 @@ function get_all_variables_and_nearest_sign_u_term_pair(parse_tree) {
 }
 
 
+// Doesn't get called anywhere
 function group(groupingAttribute, object) {
   let arr = [];
   let index_meanings = [];
@@ -649,7 +671,7 @@ function my_set_cookie(key, value) {
 }
 function my_get_cookie(key) {
   // key: string
-  // returns undefined if cookies is not present
+  // returns undefined if cookie is not present
   // deserializes value with JSON
   const val = Cookies.get(key);
   if(val === undefined) {
