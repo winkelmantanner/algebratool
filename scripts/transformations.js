@@ -1,4 +1,16 @@
+//  A TRANSFORMATION is a manipulation of an algebraic expression.
+//  Algebra Tool writes algebraic expressions as strings and models a transformation like this:
+//  {
+//    type: string (optional),
+//    location: number,
+//    num_chars: number,
+//    replacement: string,
+//    special: bool (optional)
+//    (more attributes may appear if special===true)
+//  }
 
+// This file contains a lot of generator functions that are called for each parse tree node.
+// This file also contains other stuff.
 
 
 let INSTRUCTIONS_BY_TYPE = {};
