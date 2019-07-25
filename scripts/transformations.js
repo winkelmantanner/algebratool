@@ -44,7 +44,8 @@ function get_array_of_transformation(input, parse_tree_node, array_ref = []) {
       generate_number_add_matches,
       generate_number_multiply_matches,
       generate_order_swap_matches,
-      generate_sign_distribute_matches,
+      generate_distribute_sign_matches,
+      generate_remove_parentheses_matches,
       generate_distribute_matches,
       generate_golden_rule_matches,
       generate_cancel_matches,
@@ -190,17 +191,16 @@ function* generate_order_swap_matches(input, node) {
 }
 
 INSTRUCTIONS_BY_TYPE[REMOVE_PARENTHESIS_TYPE] = 
-  "Algebra tool seems to use " + REMOVE_PARENTHESIS_TYPE + " interchangeably with " + DISTRIBUTE_SIGN_TYPE + ".\n"
-  + REMOVE_PARENTHESIS_TYPE + " can be used to remove parentheses, which is very important for Algebra Tool.\n"
-  + "Example: (x)/y → x/y";
+  REMOVE_PARENTHESIS_TYPE + " can be used to remove parentheses, which is very important for Algebra Tool.\n"
+  + "Example 1: (x)/y → x/y\n"
+  + "Example 2: x/(y/z) → x/y*z\n"
+  + "Example 3: x-(y-z) → x-y+z";
 
 INSTRUCTIONS_BY_TYPE[DISTRIBUTE_SIGN_TYPE] = 
-  "Algebra tool seems to use " + DISTRIBUTE_SIGN_TYPE + " interchangeably with " + REMOVE_PARENTHESIS_TYPE + ".\n"
-  + DISTRIBUTE_SIGN_TYPE + " can be used to remove parentheses or distribute a negative sign.\n"
-  + "Example 1: -x/(y) → x/(-y)\n"
-  + "Example 2: (x)/y → x/y";
+  DISTRIBUTE_SIGN_TYPE + " can be used to distribute a negative sign into parentheses without removing the parentheses.\n"
+  + "Example: -x/(y) → +x/(-y)";
 
-function* generate_sign_distribute_matches(input, node) {
+function* generate_distribute_sign_matches(input, node) {
   // order free
   // This function actually generates correct transformations
   const node_string = get_string(input, node);
@@ -209,17 +209,19 @@ function* generate_sign_distribute_matches(input, node) {
     && node.u_term.rule === SCALE_RULE
   ) {
     if(node.u_term.operator_u_factor_pair_array.length > 1) {
+      // there is more than one u_factor in node.u_term
       if(node.sign !== null && node.sign.char === '-') {
+        // node_string[0] === '-'
         for(let operator_u_factor_pair of node.u_term.operator_u_factor_pair_array) {
           const u_factor = operator_u_factor_pair.u_factor;
           if(u_factor.rule === UFACTOR_TO_PARENTHESISTED_EXPRESSION_RULE
             && u_factor.expression.rule === ADDITION_RULE
           ) {
-            let replacement = '+' + node_string.slice(1, u_factor.location - node.location);
+            let replacement = '+' + node_string.slice(1, u_factor.location - node.location);  // replace '-' with '+'
             replacement += '(';
             for(let sign_u_term_pair of u_factor.expression.sign_u_term_pair_array) {
               const sign_char = get_char_of_multiplied_sign_objects(node.sign, sign_u_term_pair.sign);
-              replacement += (sign_char === null ? '' : sign_char)
+              replacement += (sign_char === null ? '' : sign_char) // since node.sign.char === '-', sign_char !== null, so the '' case is impossible but is here for safety
                 + get_string(input, sign_u_term_pair.u_term);
             }
             replacement += ')';
@@ -233,12 +235,27 @@ function* generate_sign_distribute_matches(input, node) {
           }
         }
       }
+    }
+  }
+}
 
+function* generate_remove_parentheses_matches(input, node) {
+  // order free
+  // This function actually generates correct transformations
+  if(typeof node === 'object'
+    && node.type === 'sign_u_term_pair'
+    && node.u_term.rule === SCALE_RULE
+  ) {
+    if(node.u_term.operator_u_factor_pair_array.length > 1) {
+      // there is more than one u_factor in node.u_term
       for(let operator_u_factor_pair of node.u_term.operator_u_factor_pair_array) {
         const u_factor = operator_u_factor_pair.u_factor;
         if(u_factor.rule === UFACTOR_TO_PARENTHESISTED_EXPRESSION_RULE
+          && u_factor.expression.rule === ADDITION_RULE
           && u_factor.expression.sign_u_term_pair_array.length === 1
         ) {
+          // there is only one term in the u_factor.expression
+          // distribute the operator_u_factor_pair.operator into the parentheses, removing the parentheses
           const resulting_sign_char = get_char_of_multiplied_sign_objects(
             node.sign,
             u_factor.expression.sign_u_term_pair_array[0].sign);
@@ -255,13 +272,14 @@ function* generate_sign_distribute_matches(input, node) {
             location: node.location,
             num_chars: node.num_chars,
             replacement,
-            type: DISTRIBUTE_SIGN_TYPE
+            type: REMOVE_PARENTHESIS_TYPE
           };
         }
       }
     } else { // node.u_term.operator_u_factor_pair_array.length === 1
       const the_u_factor = node.u_term.operator_u_factor_pair_array[0].u_factor;
       if(the_u_factor.rule === UFACTOR_TO_PARENTHESISTED_EXPRESSION_RULE) {
+        // distribute node.sign into the_u_factor, removing the parentheses
         let replacement = '';
         const pair_array = the_u_factor.expression.sign_u_term_pair_array;
         for(let pair of pair_array) {
