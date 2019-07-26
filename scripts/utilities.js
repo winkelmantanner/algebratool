@@ -348,6 +348,29 @@ function get_transformation_to_remove_parens(string_with_parens, nearest_sign_u_
   }
 }
 
+function get_remove_paren_transformation_array(string_with_no_parens_removed, open_paren_location_array) {
+  // string_with_no_parens_removed: The string to which the returned transformations will be applied
+  // open_paren_location_array: An array of numbers.  Each number should be the location of an opening paren in string_with_no_parens_removed.
+  // if no paren removal transformations are found, the return value will be an empty array
+  let paren_removal_parser = new nearley.Parser(COMPILED_GRAMMAR);
+  paren_removal_parser.feed(string_with_no_parens_removed);
+  let paren_removal_transformations = []; // the location for these is configured for string_with_no_parens_removed
+  traverse_parse_tree_preorder(paren_removal_parser.results, (node, parent_returned) => {
+    if(node.type === 'u_factor' && node.rule === UFACTOR_TO_PARENTHESISTED_EXPRESSION_RULE) {
+      if(open_paren_location_array.some(loc => loc === node.location)) {
+        let transformation_to_remove_parens_if_applicable = get_transformation_to_remove_parens(string_with_no_parens_removed, parent_returned, node);
+        if(transformation_to_remove_parens_if_applicable !== null) {
+          paren_removal_transformations.push(transformation_to_remove_parens_if_applicable);
+        }
+      }
+    } else if(node.type === 'sign_u_term_pair') {
+      return node;
+    }
+    return parent_returned;
+  });
+  return paren_removal_transformations;
+}
+
 function get_golden_rule_transformation(input, equality_node, operator_string, expression_string) {
   let replacement = '';
   let open_paren_location_array = [];
@@ -373,23 +396,8 @@ function get_golden_rule_transformation(input, equality_node, operator_string, e
     type: GOLDEN_RULE_OF_ALGEBRA_TYPE
   };
   const result_with_no_parens_removed = get_text_after_transformation(input, transformation_with_no_parens_removed);
-
-  let paren_removal_parser = new nearley.Parser(COMPILED_GRAMMAR);
-  paren_removal_parser.feed(result_with_no_parens_removed);
-  let paren_removal_transformations = []; // the location for these is configured for result_with_no_parens_removed, but they are mapped through the shift of the location to apply them to replacement
-  traverse_parse_tree_preorder(paren_removal_parser.results, (node, parent_returned) => {
-    if(node.type === 'u_factor' && node.rule === UFACTOR_TO_PARENTHESISTED_EXPRESSION_RULE) {
-      if(open_paren_location_array.some(loc => loc === node.location)) {
-        let transformation_to_remove_parens_if_applicable = get_transformation_to_remove_parens(result_with_no_parens_removed, parent_returned, node);
-        if(transformation_to_remove_parens_if_applicable !== null) {
-          paren_removal_transformations.push(transformation_to_remove_parens_if_applicable);
-        }
-      }
-    } else if(node.type === 'sign_u_term_pair') {
-      return node;
-    }
-    return parent_returned;
-  });
+  const paren_removal_transformations = get_remove_paren_transformation_array(result_with_no_parens_removed, open_paren_location_array);
+  
   return object_spread(
     transformation_with_no_parens_removed,
     {replacement: get_text_after_multiple_transformations(
