@@ -332,7 +332,7 @@ function get_transformation_to_remove_parens(string_with_parens, nearest_sign_u_
   }
   let found = false;
   const node = u_factor_that_goes_to_parenthesised_expression; // just cause that variable name is so long
-  for(let transf_inner of generate_sign_distribute_matches(string_with_parens, nearest_sign_u_term_pair)) {
+  for(let transf_inner of generate_remove_parentheses_matches(string_with_parens, nearest_sign_u_term_pair)) {
     if(get_text_after_transformation(string_with_parens, transf_inner) === multislice(string_with_parens, [[0, node.location], [node.location + 1, node.location + node.num_chars - 1], [node.location + node.num_chars]])) {
       found = true;
     }
@@ -350,7 +350,7 @@ function get_transformation_to_remove_parens(string_with_parens, nearest_sign_u_
 
 function get_golden_rule_transformation(input, equality_node, operator_string, expression_string) {
   let replacement = '';
-  let open_paren_location_array = []; // location in replacement
+  let open_paren_location_array = [];
   for(let index = 0; index < equality_node.expression_array.length; index++) {
     if(index >= 1) {
       replacement += '=';
@@ -362,6 +362,9 @@ function get_golden_rule_transformation(input, equality_node, operator_string, e
     open_paren_location_array.push(replacement.length);
     replacement += "(" + expression_string + ")";
   }
+
+  // shift the entries of open_paren_location_array so that the locations are in input, not replacement
+  open_paren_location_array = open_paren_location_array.map(loc_in_replacement => loc_in_replacement + equality_node.location);
 
   const transformation_with_no_parens_removed = {
     location: equality_node.location,
@@ -376,7 +379,7 @@ function get_golden_rule_transformation(input, equality_node, operator_string, e
   let paren_removal_transformations = []; // the location for these is configured for result_with_no_parens_removed, but they are mapped through the shift of the location to apply them to replacement
   traverse_parse_tree_preorder(paren_removal_parser.results, (node, parent_returned) => {
     if(node.type === 'u_factor' && node.rule === UFACTOR_TO_PARENTHESISTED_EXPRESSION_RULE) {
-      if(open_paren_location_array.some(loc => loc === node.location - equality_node.location)) {
+      if(open_paren_location_array.some(loc => loc === node.location)) {
         let transformation_to_remove_parens_if_applicable = get_transformation_to_remove_parens(result_with_no_parens_removed, parent_returned, node);
         if(transformation_to_remove_parens_if_applicable !== null) {
           paren_removal_transformations.push(transformation_to_remove_parens_if_applicable);
