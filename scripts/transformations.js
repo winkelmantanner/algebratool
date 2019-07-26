@@ -555,12 +555,23 @@ function* generate_substitution_replacements(input, node) {
                     num_chars: pair.identifier.length,
                     replacement: "(" + get_string(input, pair.expression) + ")"
                   };}));
-                yield {
+                const transformation_with_no_parens_removed = {
                   location: equality.location,
                   num_chars: equality.num_chars,
                   replacement,
                   type: SUBSTITUTE_TYPE
-                }
+                };
+                const result_with_no_parens_removed = get_text_after_transformation(input, transformation_with_no_parens_removed);
+                const paren_removal_transformations = get_remove_paren_transformation_array(result_with_no_parens_removed, location_array);
+
+                yield object_spread(
+                  transformation_with_no_parens_removed,
+                  {replacement: get_text_after_multiple_transformations(
+                    replacement,
+                    paren_removal_transformations.map(
+                      transf => object_spread(transf, {location: transf.location - equality.location})
+                    ))}
+                );
               }
             }
           }
