@@ -301,8 +301,9 @@ function* generate_remove_parentheses_matches(input, node) {
 
 INSTRUCTIONS_BY_TYPE[DISTRIBUTE_TYPE] = 
   "A string of the form ([term]+[term]+...)*[factor] or ([term]+[term]+...)/[factor] can be transformed to ([term]*[factor]+[term]*[factor]+...) or ([term]/[factor]+[term]/[factor]+...).\n"
-  + "Example 1: (x+y)*z → (x*z+y*z)\n"
-  + "Example 2: (x+y)/z → (x/z+y/z)";
+  + "The parentheses into which the distribution occurs will be automatically removed if applicable.\n"
+  + "Example 1: (x+y)*z → x*z+y*z\n"
+  + "Example 2: w*(x+y)/z → w*(x/z+y/z)";
 
 function get_distribute_replacement_if_applicable(input, first_pair, second_pair) {
   // the idea is that the order of the pairs doesn't matter
@@ -338,12 +339,22 @@ function* generate_distribute_matches(input, node) {
       for(let pair_pair of [[first_pair, second_pair], [second_pair, first_pair]]) {
         const replacement = get_distribute_replacement_if_applicable(input, pair_pair[0], pair_pair[1]);
         if(replacement !== null) {
-          yield {
+          const transformation_with_no_parens_removed = {
             location: first_pair.location,
             num_chars: second_pair.location - first_pair.location + second_pair.num_chars,
             replacement,
             type: DISTRIBUTE_TYPE
           };
+          const result_with_no_parens_removed = get_text_after_transformation(input, transformation_with_no_parens_removed);
+          const remove_paren_transf_array = get_remove_paren_transformation_array(result_with_no_parens_removed, [first_pair.location + replacement.indexOf('(')]);
+          yield object_spread(
+            transformation_with_no_parens_removed,
+            {replacement: get_text_after_multiple_transformations(
+              replacement,
+              remove_paren_transf_array.map(
+                transf => object_spread(transf, {location: transf.location - first_pair.location})
+            ))}
+          );
         }
       }
     }
