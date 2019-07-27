@@ -327,6 +327,7 @@ function multislice(string, location_pair_array) {
 function get_transformation_to_remove_parens(string_with_parens, nearest_sign_u_term_pair, u_factor_that_goes_to_parenthesised_expression) {
   // returns a transformation if the parens can be deleted from the string
   // otherwise returns null
+  // This function will only make a transformation if simply deleting the parens will work
   if(u_factor_that_goes_to_parenthesised_expression.type !== 'u_factor') {
     throw 'get_transformation_to_remove_parens was passed a u_factor_that_goes_to_parenthesised_expression that was not a u_factor';
   }
@@ -351,7 +352,8 @@ function get_transformation_to_remove_parens(string_with_parens, nearest_sign_u_
 function get_remove_paren_transformation_array(string_with_no_parens_removed, open_paren_location_array) {
   // string_with_no_parens_removed: The string to which the returned transformations will be applied
   // open_paren_location_array: An array of numbers.  Each number should be the location of an opening paren in string_with_no_parens_removed.
-  // if no paren removal transformations are found, the return value will be an empty array
+  // If no paren removal transformations are found, the return value will be an empty array
+  // This function will only make transformations if simply deleting the parens will work
   let paren_removal_parser = new nearley.Parser(COMPILED_GRAMMAR);
   paren_removal_parser.feed(string_with_no_parens_removed);
   let paren_removal_transformations = []; // the location for these is configured for string_with_no_parens_removed
@@ -369,6 +371,21 @@ function get_remove_paren_transformation_array(string_with_no_parens_removed, op
     return parent_returned;
   });
   return paren_removal_transformations;
+}
+
+function get_transformation_after_parens_are_removed(input, transformation_with_no_parens_removed, open_paren_location_array) {
+  // open_paren_location_array is an array of numbers giving the locations of open parens in result_with_no_parens_removed, NOT input
+  const result_with_no_parens_removed = get_text_after_transformation(input, transformation_with_no_parens_removed);
+  const paren_removal_transformations = get_remove_paren_transformation_array(result_with_no_parens_removed, open_paren_location_array);
+  return object_spread(
+    transformation_with_no_parens_removed,
+    {replacement: get_text_after_multiple_transformations(
+      transformation_with_no_parens_removed.replacement,
+      paren_removal_transformations.map(
+        // in order to apply the transformations to transformation_with_no_parens_removed.replacement as opposed to input, we must shift the locations of the transformations
+        transf => object_spread(transf, {location: transf.location - transformation_with_no_parens_removed.location})
+      ))}
+  );
 }
 
 function get_golden_rule_transformation(input, equality_node, operator_string, expression_string) {
@@ -395,17 +412,8 @@ function get_golden_rule_transformation(input, equality_node, operator_string, e
     replacement,
     type: GOLDEN_RULE_OF_ALGEBRA_TYPE
   };
-  const result_with_no_parens_removed = get_text_after_transformation(input, transformation_with_no_parens_removed);
-  const paren_removal_transformations = get_remove_paren_transformation_array(result_with_no_parens_removed, open_paren_location_array);
-  
-  return object_spread(
-    transformation_with_no_parens_removed,
-    {replacement: get_text_after_multiple_transformations(
-      replacement,
-      paren_removal_transformations.map(
-        transf => object_spread(transf, {location: transf.location - equality_node.location})
-      ))}
-  );
+
+  return get_transformation_after_parens_are_removed(input, transformation_with_no_parens_removed, open_paren_location_array);
 }
 
 
