@@ -345,16 +345,7 @@ function* generate_distribute_matches(input, node) {
             replacement,
             type: DISTRIBUTE_TYPE
           };
-          const result_with_no_parens_removed = get_text_after_transformation(input, transformation_with_no_parens_removed);
-          const remove_paren_transf_array = get_remove_paren_transformation_array(result_with_no_parens_removed, [first_pair.location + replacement.indexOf('(')]);
-          yield object_spread(
-            transformation_with_no_parens_removed,
-            {replacement: get_text_after_multiple_transformations(
-              replacement,
-              remove_paren_transf_array.map(
-                transf => object_spread(transf, {location: transf.location - first_pair.location})
-            ))}
-          );
+          yield get_transformation_after_parens_are_removed(input, transformation_with_no_parens_removed, [first_pair.location]);
         }
       }
     }
@@ -559,30 +550,23 @@ function* generate_substitution_replacements(input, node) {
               });
               if(location_array.length > 0) {
                 const equality = target_b_factor.equality;
-                const replacement = get_text_after_multiple_transformations(
-                  get_string(input, equality),
-                  location_array.map(location_in_input => {return {
-                    location: location_in_input - equality.location,
-                    num_chars: pair.identifier.length,
-                    replacement: "(" + get_string(input, pair.expression) + ")"
-                  };}));
+                let replacement = '';
+                let prev_end_loc = equality.location;
+                let resulting_open_paren_location_array = [];
+                location_array.forEach((loc) => {
+                  replacement += input.slice(prev_end_loc, loc);
+                  resulting_open_paren_location_array.push(replacement.length + equality.location);
+                  replacement += '(' + get_string(input, pair.expression) + ')';
+                  prev_end_loc = loc + pair.identifier.length;
+                });
+                replacement += input.slice(prev_end_loc, equality.location + equality.num_chars);
                 const transformation_with_no_parens_removed = {
                   location: equality.location,
                   num_chars: equality.num_chars,
                   replacement,
                   type: SUBSTITUTE_TYPE
                 };
-                const result_with_no_parens_removed = get_text_after_transformation(input, transformation_with_no_parens_removed);
-                const paren_removal_transformations = get_remove_paren_transformation_array(result_with_no_parens_removed, location_array);
-
-                yield object_spread(
-                  transformation_with_no_parens_removed,
-                  {replacement: get_text_after_multiple_transformations(
-                    replacement,
-                    paren_removal_transformations.map(
-                      transf => object_spread(transf, {location: transf.location - equality.location})
-                    ))}
-                );
+                yield get_transformation_after_parens_are_removed(input, transformation_with_no_parens_removed, resulting_open_paren_location_array);
               }
             }
           }
