@@ -43,7 +43,7 @@
           document.getElementById("transformation_container").innerHTML = "";
           let dom_components = [];
           let map_from_type_to_transformation_array = {};
-          for(let t of get_array_of_transformation(input, parser.results)) {
+          for(let t of get_array_of_transformations(input, parser.results)) {
             if(!(t.type in map_from_type_to_transformation_array)) {
               map_from_type_to_transformation_array[t.type] = [];
             }
