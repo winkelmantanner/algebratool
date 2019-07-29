@@ -40,7 +40,7 @@ function shorten(input, expression_object) {
         throw 'asdf';
       }
       let local_expression_object = expression_parser.results[0].statement.b_term_array[0].b_factor_array[0].equality.expression_array[1];
-      let transformations = get_array_of_transformation(current_string, local_expression_object);
+      let transformations = get_array_of_transformations(current_string, local_expression_object);
       // it used to be possible to generate indefinite parenthesis nesting via distribute and reverse distribute
       // to prevent an infinite number of possible states, do not explore other options when removing parentheses is available
       let remove_parenthesis_available = transformations.some(t => t.type === REMOVE_PARENTHESIS_TYPE);

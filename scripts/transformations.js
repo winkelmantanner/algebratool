@@ -34,11 +34,15 @@ function preorder_recursive(parse_tree_node, node_callback, parent_returned, del
   }
 }
 
-function get_array_of_transformation(input, parse_tree_node, array_ref = []) {
+function get_array_of_transformations(input, parse_tree_node, array_ref = []) {
+  // input: a valid input string
+  // parse_tree_node: any parse tree node in the parse tree of input
+  // array_ref: internal use only
+  // Returns an array of all possible transformations on the input.
   if(typeof parse_tree_node === 'object' && parse_tree_node !== null && !(MY_MARK in parse_tree_node)) {
     parse_tree_node[MY_MARK] = true;
     for(let key in parse_tree_node) {
-      get_array_of_transformation(input, parse_tree_node[key], array_ref);
+      get_array_of_transformations(input, parse_tree_node[key], array_ref);
     }
     for(let generator_func of [
       generate_number_add_matches,
