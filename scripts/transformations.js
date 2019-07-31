@@ -2,12 +2,14 @@
 //  Algebra Tool writes algebraic expressions as strings and models a transformation like this:
 //  {
 //    type: string (optional),
-//    location: number,
-//    num_chars: number,
-//    replacement: string,
+//    location: number (almost always present),
+//    num_chars: number (almost always present),
+//    replacement: string (almost always present),
 //    special: bool (optional)
 //    (more attributes may appear if special===true)
 //  }
+//
+//  location, num_chars, and replacement may be absent in Golden Rule of Algebra transformations.
 
 // This file contains a lot of generator functions that are called for each parse tree node.
 // This file also contains other stuff.
