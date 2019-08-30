@@ -451,15 +451,52 @@ function* generate_one_removal_matches(input, node) {
 
 INSTRUCTIONS_BY_TYPE[GOLDEN_RULE_OF_ALGEBRA_TYPE] = 
   "Any mathematical operation can be performed on one side of an equation so long as the identical operation is performed on the other side of the equation. <a href='http://hyperphysics.phy-astr.gsu.edu/hbase/alg2.html#ag'>[source]</a>\n"
-  + "Select an equation. Then, use the Operator box to specify the operation.  Use the Expression box to specify the right operand.\n"
+  + "Algebra tool will make buttons for adding or subtracting by a term of either side or multiplying or dividing by a factor of either side.\n"
+  + "To make a custom Golden Rule of Algebra transformation, select an equation. Then use the Operator box to specify the operation.  Use the Expression box to specify the right operand.\n"
   + "Algebra Tool wraps the previous expression and the right operand in parentheses only if necessary.\n"
-  + "<strong>Warning:</strong>If you divide by something, make sure that it is not 0.  Algebra tool cannot check that for you.";
+  + "<strong>Warning:</strong>If you divide by something, make sure that it is not 0.  Algebra tool cannot check that for you.\n"
+  + "Example: x*y=4 → x*y/x=4/x\n"
+  + "In this example, to simplify the left-hand side after Golden Rule of Algebra, these transformations must be used: "
+  + CHANGE_ORDER_TYPE + ", " + CANCEL_TYPE + ", " + REMOVE_ONE_TYPE;
 
 function* generate_golden_rule_matches(input, node) {
   // does not use order
   if(node.type === 'equality'
     && node.rule === EQUALITY_RULE
   ) {
+    for(let expression of node.expression_array) {
+      if(expression.rule === ADDITION_RULE
+        && expression.sign_u_term_pair_array.length >= 1
+      ) {
+        for(let sign_u_term_pair of expression.sign_u_term_pair_array) {
+          if(get_string(input, sign_u_term_pair.u_term) !== '0') {
+            yield get_golden_rule_transformation(
+              input,
+              node,
+              get_char_of_multiplied_sign_objects(sign_u_term_pair.sign, {char: '-'}),
+              get_string(input, sign_u_term_pair.u_term)
+            );
+          }
+        }
+      }
+      
+      if(expression.rule === ADDITION_RULE
+        && expression.sign_u_term_pair_array.length === 1
+        && expression.sign_u_term_pair_array[0].u_term.rule === SCALE_RULE
+      ) {
+        for(let operator_u_factor_pair of expression.sign_u_term_pair_array[0].u_term.operator_u_factor_pair_array) {
+          if(get_string(input, operator_u_factor_pair.u_factor) !== '1') {
+            yield get_golden_rule_transformation(
+              input,
+              node,
+              get_char_of_multiplied_operator_objects(operator_u_factor_pair.operator, {char: '/'}),
+              get_string(input, operator_u_factor_pair.u_factor)
+            );
+          }
+        }
+      }
+    }
+
     yield {
       type: GOLDEN_RULE_OF_ALGEBRA_TYPE,
       special: true,
