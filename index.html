@@ -62,11 +62,12 @@
           for(let type of types) {
             let div = $('<div float="left" class="transformation_box card"></div>');
             div.append($(get_transformation_header_html(type)));
+            let golden_rule_radio_button_and_label_array = []; // This is used to make the radio buttons and their labels appear after the regular transformation buttons.
             if(type in map_from_type_to_transformation_array) {
               for(let [transformation_index, transformation] of map_from_type_to_transformation_array[type].entries()) {
                 if(transformation.special === true) {
                   if(type === GOLDEN_RULE_OF_ALGEBRA_TYPE) {
-                    div.append(get_golden_rule_radio_button_and_label(input, transformation_index, transformation.equality));
+                    golden_rule_radio_button_and_label_array.push(get_golden_rule_radio_button_and_label(input, transformation_index, transformation.equality));
                   } else if(type === SHORTEN_TYPE) {
                     div.append(get_shorten_radio_button_and_label(input, transformation_index, transformation.expression));
                   } else if(type === IDENTITIES_TYPE) {
@@ -84,6 +85,9 @@
                 }
               }
               if(type === GOLDEN_RULE_OF_ALGEBRA_TYPE) {
+                for(const radio_button_and_label of golden_rule_radio_button_and_label_array) {
+                  div.append(radio_button_and_label);
+                }
                 div.append($('<div id="' + GOLDEN_RULE_ACTION_DIV_CONTAINER_ID + '"></div>'));
               } else if(type === SHORTEN_TYPE) {
                 div.append($('<div id="' + SHORTEN_ACTION_DIV_CONTAINER_ID + '"></div>'));
