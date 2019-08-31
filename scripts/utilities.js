@@ -700,3 +700,33 @@ function my_get_cookie(key) {
   }
 }
 
+const MAX_RGB_VALUE = 255;
+const MIN_RGB_VALUE = 0;
+
+function floatToRgb(number) {
+  // Converts a number between 0 and 1 inclusive to an array of 3 rgb values.
+  // The RGB values will be in the range 50...168.
+  // Uses similar algorithm to https://www.google.com/search?q=color+picker.
+  let current_index = 0;
+  let rgb_values = [
+    MIN_RGB_VALUE,
+    MIN_RGB_VALUE,
+    MAX_RGB_VALUE
+  ];
+  while(current_index < 6 * number) {
+    if(current_index % 2 === 0) {
+      rgb_values[Math.floor(current_index / 2)] += (MAX_RGB_VALUE - MIN_RGB_VALUE);
+    } else { // current_index % 2 === 1
+      rgb_values[(Math.floor(current_index / 2) + 2) % 3] -= (MAX_RGB_VALUE - MIN_RGB_VALUE);
+    }
+    current_index++;
+  }
+  const scalar = current_index - (6 * number);
+  if(current_index % 2 === 1) {
+    rgb_values[Math.floor(current_index / 2)] -= scalar * (MAX_RGB_VALUE - MIN_RGB_VALUE);
+  } else {
+    rgb_values[(Math.floor(current_index / 2) + 1) % 3] += scalar * (MAX_RGB_VALUE - MIN_RGB_VALUE);
+  }
+  return rgb_values;
+}
+
