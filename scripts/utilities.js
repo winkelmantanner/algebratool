@@ -705,7 +705,6 @@ const MIN_RGB_VALUE = 0;
 
 function floatToRgb(number) {
   // Converts a number between 0 and 1 inclusive to an array of 3 rgb values.
-  // The RGB values will be in the range 50...168.
   // Uses similar algorithm to https://www.google.com/search?q=color+picker.
   let current_index = 0;
   let rgb_values = [
