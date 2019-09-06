@@ -396,7 +396,9 @@ function* generate_cancel_matches(input, node) {
 
 INSTRUCTIONS_BY_TYPE[REMOVE_ZERO_TYPE] = 
   "0 as a term can be removed.\n"
-  + "Example: +0-x → -x";
+  + "Example 1: +0-x → -x\n"
+  + "Additionally, any term that has that has 0 as a factor can be removed.\n"
+  + "Example 2: (x-8)*0/3+2*x → +2*x";
 
 function* generate_zero_removal_matches(input, node) {
   // does not use order
@@ -406,7 +408,8 @@ function* generate_zero_removal_matches(input, node) {
       for(let pair of pair_array) {
         if(pair.u_term.rule === SCALE_RULE
           && pair.u_term.operator_u_factor_pair_array.some(operator_u_factor_pair =>
-            operator_u_factor_pair.u_factor.rule === UFACTOR_TO_UNUMBER_RULE
+            (operator_u_factor_pair.operator === null || operator_u_factor_pair.operator.char === '*')
+            && operator_u_factor_pair.u_factor.rule === UFACTOR_TO_UNUMBER_RULE
             && operator_u_factor_pair.u_factor.u_number.value === 0
           )
         ) {
