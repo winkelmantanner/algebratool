@@ -468,6 +468,7 @@ function* generate_golden_rule_matches(input, node) {
   if(node.type === 'equality'
     && node.rule === EQUALITY_RULE
   ) {
+    let generate_negation = false;
     for(let expression of node.expression_array) {
       if(expression.rule === ADDITION_RULE
         && expression.sign_u_term_pair_array.length >= 1
@@ -488,8 +489,12 @@ function* generate_golden_rule_matches(input, node) {
         && expression.sign_u_term_pair_array.length === 1
         && expression.sign_u_term_pair_array[0].u_term.rule === SCALE_RULE
       ) {
-        for(let operator_u_factor_pair of expression.sign_u_term_pair_array[0].u_term.operator_u_factor_pair_array) {
-          if(get_string(input, operator_u_factor_pair.u_factor) !== '1') {
+        const operator_u_factor_pair_array = expression.sign_u_term_pair_array[0].u_term.operator_u_factor_pair_array;
+        for(let operator_u_factor_pair of operator_u_factor_pair_array) {
+          if(
+            get_string(input, operator_u_factor_pair.u_factor) !== '1'
+            && get_string(input, operator_u_factor_pair.u_factor) !== '0'
+          ) {
             yield get_golden_rule_transformation(
               input,
               node,
@@ -498,7 +503,24 @@ function* generate_golden_rule_matches(input, node) {
             );
           }
         }
+
+        if(
+          expression.sign_u_term_pair_array[0].sign !== null
+          && expression.sign_u_term_pair_array[0].sign.char === '-'
+          && operator_u_factor_pair_array.length === 1
+          && operator_u_factor_pair_array[0].u_factor.rule === UFACTOR_TO_UVARIABLE_RULE
+        ) {
+          generate_negation = true;
+        }
       }
+    }
+    if(generate_negation) {
+      yield get_golden_rule_transformation(
+        input,
+        node,
+        '*',
+        '-1'
+      );
     }
 
     yield {
