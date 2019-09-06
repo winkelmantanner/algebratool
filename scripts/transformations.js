@@ -405,9 +405,10 @@ function* generate_zero_removal_matches(input, node) {
     if(pair_array.length > 1) {
       for(let pair of pair_array) {
         if(pair.u_term.rule === SCALE_RULE
-          && pair.u_term.operator_u_factor_pair_array.length === 1
-          && pair.u_term.operator_u_factor_pair_array[0].u_factor.rule === UFACTOR_TO_UNUMBER_RULE
-          && pair.u_term.operator_u_factor_pair_array[0].u_factor.u_number.value === 0
+          && pair.u_term.operator_u_factor_pair_array.some(operator_u_factor_pair =>
+            operator_u_factor_pair.u_factor.rule === UFACTOR_TO_UNUMBER_RULE
+            && operator_u_factor_pair.u_factor.u_number.value === 0
+          )
         ) {
           yield {
             location: pair.location,
