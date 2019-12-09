@@ -192,7 +192,7 @@ function get_button_html_of_transformation(input, transformation, header_in_butt
   transformations_by_id[current_transformation_id] = transformation;
   current_input_id++;
   inputs_by_id[current_input_id] = input;
-  return "<button style='padding: 5px;' onclick='transformation_on_click(" + String(current_input_id) + ", " + String(current_transformation_id) + ")'>"
+  return "<button style='width: 100%; height: 100%;' onclick='transformation_on_click(" + String(current_input_id) + ", " + String(current_transformation_id) + ")'>"
     + "<div>"
     + (header_in_button ? get_transformation_header_html(transformation.type) : "")
     + "<div float='top'>"
