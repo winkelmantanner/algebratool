@@ -726,6 +726,6 @@ function floatToRgb(number) {
   } else {
     rgb_values[(Math.floor(current_index / 2) + 1) % 3] += scalar * (MAX_RGB_VALUE - MIN_RGB_VALUE);
   }
-  return rgb_values;
+  return rgb_values.map(Math.floor);
 }
 
