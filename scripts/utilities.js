@@ -146,8 +146,7 @@ function transformation_on_click(input_id, transformation_id) {
 }
 function transformation_on_click_given_input_and_transformation(input, transformation) {
   // history.push(object_spread({string_before: input}, transformation));
-  document.getElementById('input').value = 
-    get_text_after_transformation(input, transformation);
+  setInputBoxValue(get_text_after_transformation(input, transformation));
   history_push(input, transformation);
   clear_transformations();
   parse(get_text_after_transformation(input, transformation));
@@ -520,12 +519,6 @@ function history_push(input_before, transformation) {
   history_scrollable_div.append($('<hr style="margin: 3px;" />'));
   history_scrollable_div.append(get_history_entry_div(history.length, input_before, transformation));
   history_scrollable_div[0].scrollTop = history_scrollable_div[0].scrollHeight;
-}
-
-function remove_spaces_from_content(input_element) {
-  const pos = input_element.selectionStart;
-  input_element.value = input_element.value.split('').filter(c => c !== ' ' && c !== '\t' && c !== '\n').join('');
-  input_element.selectionStart = input_element.selectionEnd = pos;
 }
 
 
