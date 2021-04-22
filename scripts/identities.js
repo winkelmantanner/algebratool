@@ -162,7 +162,7 @@ function get_sides_from_identity_with_given_key(identity_key) {
 
 function enable_identities_checkbox_onclick() {
   refresh_identities_menu();
-  parse(document.getElementById("input").value);
+  parse(getInputBoxValue());
 }
 
 function refresh_identities_menu(new_action=DEFAULT_ACTION, new_identity_key=DEFAULT_IDENTITY_KEY) {

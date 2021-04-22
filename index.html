@@ -117,7 +117,9 @@
         makeTransformationBoxesMatchCurrentRgbValues();
         const rgb_string = 'rgb(' + current_rgb_values.join(',') + ')';
         // If you change "0 0 50px", also change where it occurs in the HTML.
-        document.getElementById('input').style.boxShadow = "0 0 50px " + rgb_string;
+        const box_shadow_string = "0 0 50px " + rgb_string;
+        document.getElementById('input_ace').style.boxShadow = box_shadow_string;
+        document.getElementById('input_plain').style.boxShadow = box_shadow_string;
       }
 
       function makeTransformationBoxesMatchCurrentRgbValues() {
@@ -130,51 +132,85 @@
 
       let editor;
 
+      function getTextInputTypeDropdownValue() {
+        return document.getElementById("text_input_type_dropdown").value;
+      }
       function setInputBoxValue(new_value) {
-        editor.setValue(new_value, 1);
+        if(getTextInputTypeDropdownValue() === "ace") {
+          editor.setValue(new_value, 1);
+        } else { // "plain"
+          document.getElementById("input_plain").value = new_value;
+        }
+      }
+      function getInputBoxValue() {
+        if(getTextInputTypeDropdownValue() === "ace") {
+          return editor.getValue();
+        } else { // "plain"
+          return document.getElementById("input_plain").value;
+        }
+      }
+      function textInputTypeOnChange(new_value) {
+        let text;
+        if(document.getElementById("input_plain").style.display !== "none") {
+          text = document.getElementById("input_plain").value;
+        } else {
+          text = editor.getValue();
+        }
+        if(new_value == "ace") {
+          document.getElementById("input_ace").style.display = 'block';
+          document.getElementById("input_plain").style.display = 'none';
+        } else { // "plain"
+          document.getElementById("input_ace").style.display = 'none';
+          document.getElementById("input_plain").style.display = 'initial';
+        }
+        setInputBoxValue(text);
+      }
+
+      function onTextInputValueChange(event) {
+        const input = getInputBoxValue()
+        let cleaned_input = input.replace(/\s|\n/g, '');
+        if(cleaned_input !== input) {
+          // editor.setValue invokes the event, so this is recursive
+          setInputBoxValue(cleaned_input);
+        } else {
+          if($('#history_scrollable_div').length !== 0 && input !== get_text_after_transformation(history[history.length - 1].string_before, history[history.length - 1])) {
+            let last_transformation = history[history.length - 1];
+            if(last_transformation.type === MANUAL_CHANGE_TYPE) {
+              last_transformation.replacement = input;
+              $('#' + HISTORY_ENTRY_DIV_PREFIX + String(history.length))
+                .empty()
+                .append(get_history_entry_div(history.length, input, last_transformation));
+            } else {
+              history_push('', {
+                location: 0,
+                num_chars: Infinity,
+                replacement: input,
+                type: MANUAL_CHANGE_TYPE
+              });
+            }
+          }
+
+          parse(input);
+        }
       }
 
       function onLoad() {
         // $('#identity_editor').append(get_static_identity_editor_jquery_object());
         $('#enable_identities_checkbox').click(enable_identities_checkbox_onclick);
 
-        editor = ace.edit("input", {mode: "ace/mode/python"}); // ACE https://github.com/ajaxorg/ace
+        editor = ace.edit("input_ace", {mode: "ace/mode/python"}); // ACE https://github.com/ajaxorg/ace
         editor.renderer.setShowGutter(false);
         editor.setFontSize(20);
         editor.focus();
         const prev_func = ace.require("ace/ext/searchbox").Search;
         ace.require("ace/ext/searchbox").Search = function(edtr, isReplace) {
           // https://github.com/ajaxorg/ace/issues/4164
-          document.getElementById("input").style.height = "100px";
+          document.getElementById("input_ace").style.height = "100px";
           prev_func(edtr, isReplace);
         };
-        editor.on("input", function(event) {
-          const input = editor.getValue();
-          let cleaned_input = input.replace(/\s|\n/g, '');
-          if(cleaned_input !== input) {
-            // editor.setValue invokes the event, so this is recursive
-            setInputBoxValue(cleaned_input);
-          } else {
-            if($('#history_scrollable_div').length !== 0 && input !== get_text_after_transformation(history[history.length - 1].string_before, history[history.length - 1])) {
-              let last_transformation = history[history.length - 1];
-              if(last_transformation.type === MANUAL_CHANGE_TYPE) {
-                last_transformation.replacement = input;
-                $('#' + HISTORY_ENTRY_DIV_PREFIX + String(history.length))
-                  .empty()
-                  .append(get_history_entry_div(history.length, input, last_transformation));
-              } else {
-                history_push('', {
-                  location: 0,
-                  num_chars: Infinity,
-                  replacement: input,
-                  type: MANUAL_CHANGE_TYPE
-                });
-              }
-            }
+        editor.on("input", onTextInputValueChange);
 
-            parse(input);
-          }
-        });
+        document.getElementById("input_plain").addEventListener("input", onTextInputValueChange);
 
         parse('');
       }
@@ -183,8 +219,15 @@
   <body onLoad="onLoad();">
     <div style='padding: 5px;'>
       <div style='float: right;'>
+        <label for="text_input_type">Text Input Type:</label>
+        <select name="text_input_type" id="text_input_type_dropdown" onchange="textInputTypeOnChange(this.value)">
+          <!-- The values must match the JavaScript -->
+          <option value="ace">ACE Editor</option>
+          <option value="plain">Text Box</option>
+        </select>
+        <br />
         <!-- The 100 in the line below must match the JavaScript. -->
-        <input type="range" id="colorRangeInput" name="color" min="0" max="100" value="0" oninput="onMoveColorSlider(this.value)">
+        Theme Color:<input type="range" id="colorRangeInput" name="color" min="0" max="100" value="0" oninput="onMoveColorSlider(this.value)">
       </div>
       <h3>Algebra Tool</h3>
       <p style='white-space: pre-wrap; text-indent: -50px;'>
@@ -205,7 +248,8 @@
       Enter equation(s) here:
       <div float="top">
         <!-- If you change "0 0 50px", also change where it occurs in the JavaScript. -->
-        <div id="input" class="ace-alg-tool" style="width: 100%; height: 31px; box-shadow: 0 0 50px blue; border: 1px solid grey;"></div>
+        <div id="input_ace" class="ace-alg-tool" style="width: 100%; height: 31px; box-shadow: 0 0 50px blue; border: 1px solid grey;"></div>
+        <input id="input_plain" style='width: 100%; box-shadow: 0 0 50px blue; display: none;' type='text' />
       </div>
       
       <!-- <div>
