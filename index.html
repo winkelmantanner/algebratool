@@ -140,6 +140,7 @@
         editor = ace.edit("input"); // ACE https://github.com/ajaxorg/ace
         editor.renderer.setShowGutter(false);
         editor.setFontSize(20);
+        editor.focus();
         editor.on("input", function(event) {
           const input = editor.getValue();
           let cleaned_input = input.replace(/\s|\n/g, '');
@@ -197,7 +198,7 @@
       Enter equation(s) here:
       <div float="top">
         <!-- If you change "0 0 50px", also change where it occurs in the JavaScript. -->
-        <div id="input" style="width: 100%; height: 30px; box-shadow: 0 0 50px blue; position: relative;"></div>
+        <div id="input" class="ace-alg-tool" style="width: 100%; height: 31px; box-shadow: 0 0 50px blue; border: 1px solid grey;"></div>
       </div>
       
       <!-- <div>
