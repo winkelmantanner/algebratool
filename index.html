@@ -18,6 +18,7 @@
     <script src='scripts/powertools.js'></script>
     <script src='scripts/PriorityQueue.js'></script>
     <script src="ace-min/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script src="ace-min/ext-searchbox.js" type="text/javascript" charset="utf-8"></script>
 
     <title>Algebra Tool - Solve Problems by Clicking Buttons</title>
 
@@ -137,10 +138,16 @@
         // $('#identity_editor').append(get_static_identity_editor_jquery_object());
         $('#enable_identities_checkbox').click(enable_identities_checkbox_onclick);
 
-        editor = ace.edit("input"); // ACE https://github.com/ajaxorg/ace
+        editor = ace.edit("input", {mode: "ace/mode/javascript"}); // ACE https://github.com/ajaxorg/ace
         editor.renderer.setShowGutter(false);
         editor.setFontSize(20);
         editor.focus();
+        const prev_func = ace.require("ace/ext/searchbox").Search;
+        ace.require("ace/ext/searchbox").Search = function(edtr, isReplace) {
+          // https://github.com/ajaxorg/ace/issues/4164
+          document.getElementById("input").style.height = "100px";
+          prev_func(edtr, isReplace);
+        };
         editor.on("input", function(event) {
           const input = editor.getValue();
           let cleaned_input = input.replace(/\s|\n/g, '');
