@@ -4,3 +4,7 @@
   margin: 5px;
   border: 5px solid blue;
 }
+
+.ace_marker-layer {
+  background: white;
+}
